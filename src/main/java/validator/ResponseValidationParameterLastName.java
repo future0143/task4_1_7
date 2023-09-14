@@ -5,19 +5,16 @@ import io.restassured.response.Response;
 import matcher.DateMatchers;
 import model.Customer;
 import org.hamcrest.Matchers;
-import org.json.simple.parser.ParseException;
-import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;
 
-public class BodyValidationPositive {
+public class ResponseValidationParameterLastName {
 
-    @Test
-    public static void validateFields(String requestBody, Response responseBody, String phoneNumber, LocalDateTime nowTime, int statusCode) throws ParseException {
+    public static void validateFields(String requestBody, Response responseBody, String phoneNumber, LocalDateTime nowTime, int statusCode, String argument) {
         responseBody.then().contentType(ContentType.JSON).statusCode(statusCode)
                 .body("id", Matchers.notNullValue())
                 .body("firstName", Matchers.equalTo(Customer.getCustomer(requestBody).get("firstName")))
-                .body("lastName", Matchers.equalTo(Customer.getCustomer(requestBody).get("lastName")))
+                .body("lastName", Matchers.equalTo(argument))
                 .body("phoneNumber", Matchers.equalTo(phoneNumber))
                 .body("email", Matchers.equalTo(Customer.getCustomer(requestBody).get("email")))
                 .body("dateOfBirth", Matchers.equalTo(Customer.getCustomer(requestBody).get("dateOfBirth")))
@@ -25,7 +22,7 @@ public class BodyValidationPositive {
                 .body("loyalty.status", Matchers.notNullValue())
                 .body("loyalty.discountRate", Matchers.notNullValue())
                 .body("shopCode", Matchers.nullValue())
-                .body("updatedAt", DateMatchers.isToday(nowTime))
-                .body("createdAt", DateMatchers.isToday(nowTime));
+                .body("updatedAt", DateMatchers.isAfter(nowTime))
+                .body("createdAt", DateMatchers.isAfter(nowTime));
     }
 }

@@ -7,9 +7,12 @@ import org.json.simple.parser.ParseException;
 //достает данные из json как объект
 public class Customer {
 
-    public static JSONObject getCustomer(String body) throws ParseException {
+    public static JSONObject getCustomer(String body) {
         JSONParser parser = new JSONParser();
-        JSONObject customer = (JSONObject) parser.parse(body);
-        return customer;
+        try {
+            return (JSONObject) parser.parse(body);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
