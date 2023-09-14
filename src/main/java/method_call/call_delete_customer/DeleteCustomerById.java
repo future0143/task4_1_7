@@ -7,7 +7,6 @@ import io.restassured.response.Response;
 public class DeleteCustomerById {
 
     public static Response deleteCustomer(int id) {
-        Response responseBody = RestAssured.delete(EndPoints.DELETE_CUSTOMERS.getPath(), id);
-        return responseBody;
+        return RestAssured.delete(EndPoints.DELETE_CUSTOMERS.getPath(), id);
     }
 }

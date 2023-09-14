@@ -7,7 +7,6 @@ import io.restassured.response.Response;
 public class GetCustomerById {
 
     public static Response getCustomerById(int id) {
-        Response responseBody = RestAssured.get(EndPoints.GET_CUSTOMERS_BY_ID.getPath(), id);
-        return responseBody;
+        return RestAssured.get(EndPoints.GET_CUSTOMERS_BY_ID.getPath(), id);
     }
 }

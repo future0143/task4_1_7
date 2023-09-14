@@ -94,18 +94,17 @@ public class GettingCustomerByPhoneNumberTest {
         String errorMessage = "Customer not found";
         String digitsOnly = phoneNumber.replaceAll("[^0-9]", "");
 
-        StringBuilder formattedNumber = new StringBuilder("+");
-        formattedNumber.append(digitsOnly.charAt(0)); // Добавляем +7
-        formattedNumber.append("(");
-        formattedNumber.append(digitsOnly, 1, 4); // Добавляем код региона
-        formattedNumber.append(")");
-        formattedNumber.append(digitsOnly, 4, 7); // Добавляем первую группу цифр
-        formattedNumber.append("-");
-        formattedNumber.append(digitsOnly, 7, 9); // Добавляем вторую группу цифр
-        formattedNumber.append("-");
-        formattedNumber.append(digitsOnly.substring(9)); // Добавляем оставшиеся цифры
+        String formattedNumber = "+" + digitsOnly.charAt(0) + // Добавляем +7
+                "(" +
+                digitsOnly.substring(1, 4) + // Добавляем код региона
+                ")" +
+                digitsOnly.substring(4, 7) + // Добавляем первую группу цифр
+                "-" +
+                digitsOnly.substring(7, 9) + // Добавляем вторую группу цифр
+                "-" +
+                digitsOnly.substring(9); // Добавляем оставшиеся цифры
 
-        Response responseBody = getCustomerByPhoneNumber(formattedNumber.toString());
+        Response responseBody = getCustomerByPhoneNumber(formattedNumber);
 
         ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
     }
