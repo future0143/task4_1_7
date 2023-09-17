@@ -1,4 +1,4 @@
-package templates.get_Request_Specification;
+package templates.get_request_specification;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;

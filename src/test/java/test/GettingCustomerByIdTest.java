@@ -1,6 +1,6 @@
 package test;
 
-import config.ApiConfig;
+import config.ApiConfigSetup;
 import config.DataProvider;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
@@ -14,20 +14,15 @@ import java.time.LocalDateTime;
 
 import static method_call.call_create_customer.CreateCustomer.createCustomer;
 import static method_call.call_delete_customer.DeleteCustomerById.deleteCustomer;
-import static method_call.call_get_ById_customer.GetCustomerById.getCustomerById;
+import static method_call.call_get_byId_customer.GetCustomerById.getCustomerById;
 import static utils.GeneratorPhoneNumber.getPhoneNumber;
 
-public class GettingCustomerByIdTest {
+public class GettingCustomerByIdTest implements ApiConfigSetup {
 
     private static int id;
     private static String requestBody;
     private static String phoneNumber;
     private static LocalDateTime nowTime;
-
-    @BeforeAll
-    public static void setUp() {
-        ApiConfig.setUp();
-    }
 
     @BeforeEach
     void creatingCustomer(TestInfo info) {
@@ -47,11 +42,11 @@ public class GettingCustomerByIdTest {
     @DisplayName("Получение клиента по существующему id")
     @Description("Получение клиента по существующему id")
     public void getCustomerByExistingId() {
-        int expectedStatusCode = 200;
+        int statusCode = 200;
 
         Response responseBody = getCustomerById(id);
 
-        ResponseValidationPositive.validateFields(requestBody, responseBody, phoneNumber, nowTime, expectedStatusCode);
+        ResponseValidationPositive.validateFields(requestBody, responseBody, statusCode, nowTime, phoneNumber);
     }
 
     @Test

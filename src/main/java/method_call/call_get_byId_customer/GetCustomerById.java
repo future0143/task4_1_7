@@ -1,4 +1,4 @@
-package method_call.call_get_ById_customer;
+package method_call.call_get_byId_customer;
 
 import config.EndPoints;
 import io.restassured.RestAssured;

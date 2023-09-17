@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "firstName": {
+      "type": "string"
+    },
+    "lastName": {
+      "type": "string"
+    },
+    "phoneNumber": {
+      "type": "string",
+      "pattern": "^\\+7[0-9]{10}"
+    },
+    "email": {
+      "type": ["string", "null"]
+    },
+    "dateOfBirth": {
+      "type": ["string", "null"]
+    },
+    "loyalty": {
+      "type": "object",
+      "properties": {
+        "bonusCardNumber": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "discountRate": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "bonusCardNumber",
+        "status",
+        "discountRate"
+      ]
+    },
+    "shopCode": {
+      "type": ["string", "null"]
+    },
+    "updatedAt": {
+      "type": "string"
+    },
+    "createdAt": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "firstName",
+    "lastName",
+    "phoneNumber"
+  ]
+}

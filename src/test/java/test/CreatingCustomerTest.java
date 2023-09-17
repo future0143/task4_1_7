@@ -1,16 +1,16 @@
 package test;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static utils.GeneratorPhoneNumber.getPhoneNumber;
 import static method_call.call_create_customer.CreateCustomer.createCustomer;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.not;
 
-import config.ApiConfig;
+import config.ApiConfigSetup;
 import config.DataProvider;
 import io.restassured.response.Response;
 import jdk.jfr.Description;
 import model.Customer;
-import org.junit.jupiter.api.BeforeAll;
+import config.SerializingCustomer;
+import model.Loyalty;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,14 +23,9 @@ import validator.*;
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
-public class CreatingCustomerTest {
+public class CreatingCustomerTest implements ApiConfigSetup {
 
-    @BeforeAll
-    public static void setUp() {
-        ApiConfig.setUp();
-    }
-
-    @ParameterizedTest
+    @ParameterizedTest(name = "Заполнение полей из файла: {0}")
     @DisplayName("Создание клиента с заполнением различных наборов полей")
     @Description("Создание клиента с заполнением полей")
     @MethodSource("argsProviderFactoryRequestBody")
@@ -43,7 +38,7 @@ public class CreatingCustomerTest {
 
         Response responseBody = createCustomer(requestBody, phoneNumber);
 
-        ResponseValidationPositive.validateFields(requestBody, responseBody, phoneNumber, nowTime, statusCode);
+        ResponseValidationPositive.validateFields(requestBody, responseBody, statusCode, nowTime, phoneNumber);
     }
 
     static Stream<String> argsProviderFactoryRequestBody() {
@@ -52,44 +47,64 @@ public class CreatingCustomerTest {
                 "src/main/resources/request/post_request/create-customer-swapped-fields.json");
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "Создание клиента с именем {0}")
     @DisplayName("Создание клиента с параметризацией firstName")
     @Description("Создание клиента с параметризацией firstName")
     @MethodSource("argsProviderFactoryFirstName")
     public void createNewCustomerWithParametersOfFirstName(String argument) {
         String requestBody = DataProvider.getTestData("src/main/resources/request/post_request/create-customer-required-fields.json");
         String phoneNumber = getPhoneNumber();
-        int expectedStatusCode = 201;
+        int statusCode = 201;
 
         LocalDateTime nowTime = LocalDateTime.now();
 
         Response responseBody = createCustomer(requestBody.replace("Ivan", argument), phoneNumber);
 
-        ResponseValidationParameterFirstName.validateFields(requestBody, responseBody, phoneNumber, nowTime, expectedStatusCode, argument);
+        ResponseValidationPositive.validateFields(requestBody, responseBody, statusCode, nowTime, phoneNumber, argument);
     }
 
     static Stream<String> argsProviderFactoryFirstName() {
         return Stream.of("Ivan", "I", " Ivan", "Ivan-Petr", "Иван", "Ivan Petr", "Пётр", "Ivan Пётр");
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "Создание клиента с фамилией {0}")
     @DisplayName("Создание клиента с параметризацией lastName")
     @Description("Создание клиента с параметризацией lastName")
     @MethodSource("argsProviderFactoryLastName")
     public void createNewCustomerWithParametersOfLastName(String argument) {
         String requestBody = DataProvider.getTestData("src/main/resources/request/post_request/create-customer-required-fields.json");
         String phoneNumber = getPhoneNumber();
-        int expectedStatusCode = 201;
+        int statusCode = 201;
 
         LocalDateTime nowTime = LocalDateTime.now();
 
         Response responseBody = createCustomer(requestBody.replace("Petrov", argument), phoneNumber);
 
-        ResponseValidationParameterLastName.validateFields(requestBody, responseBody, phoneNumber, nowTime, expectedStatusCode, argument);
+        ResponseValidationPositive.validateFields(requestBody, responseBody, statusCode, nowTime, phoneNumber, argument);
     }
 
     static Stream<String> argsProviderFactoryLastName() {
         return Stream.of("Petrov", "P", " Petrov", "Petrov-Smirnov", "Петров", "Petrov Smirnov");
+    }
+
+    @ParameterizedTest(name = "Создание клиента с email {0}")
+    @DisplayName("Создание клиента с параметризацией email, позитивные тесты")
+    @Description("Создание клиента с параметризацией email, позитивные тесты")
+    @MethodSource("argsProviderFactoryEmailPositive")
+    public void createNewCustomerWithParametersOfEmailPositive(String argument) {
+        String requestBody = DataProvider.getTestData("src/main/resources/request/post_request/create-customer-required-fields-and-email.json");
+        String phoneNumber = getPhoneNumber();
+        int statusCode = 201;
+
+        LocalDateTime nowTime = LocalDateTime.now();
+
+        Response responseBody = createCustomer(requestBody.replace("ivanpetr@mail.ru", argument), phoneNumber);
+
+        ResponseValidationPositive.validateFields(requestBody, responseBody, statusCode, nowTime, phoneNumber, argument);
+    }
+
+    static Stream<String> argsProviderFactoryEmailPositive() {
+        return Stream.of("ivan-petr@mail.ru", "ivan-petr@mail.ru", "i@mail.ru", "ivanpetr@mail.com", "ivanpetr@gmail.com");
     }
 
     @Test
@@ -109,16 +124,16 @@ public class CreatingCustomerTest {
     }
 
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "Пустое значение поля {0}")
     @DisplayName("Создание клиента с пустым значением одного из обязательных полей")
-    @Description("Создание клиента с пустым значением для полей: firstName, lastName")
+    @Description("Создание клиента с пустым значением для полей: firstName, lastName, phoneNumber")
     @MethodSource("argsProviderFactoryEmptyValue")
     public void createNewCustomerWithEmptyValueRequiredField(String argument, String errorMessage) {
         String requestBody = DataProvider.getTestData("src/main/resources/request/post_request/create-customer-required-fields.json");
         String phoneNumber = getPhoneNumber();
         int statusCode = 400;
 
-        Response responseBody = createCustomer(requestBody.replace(Customer.getCustomer(requestBody).get(argument).toString(), ""), phoneNumber);
+        Response responseBody = createCustomer(requestBody.replace(SerializingCustomer.getCustomerFromRequestBody(requestBody).get(argument), ""), phoneNumber);
 
         ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
     }
@@ -129,7 +144,7 @@ public class CreatingCustomerTest {
                 Arguments.of("phoneNumber", "Invalid phoneNumber: expected format +7XXXXXXXXXX"));
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "Отсутствие обязательного поля {0}")
     @DisplayName("Создание клиента без одного из обязательных полей")
     @Description("Создание клиента без одного из полей: firstName, lastName, phoneNumber")
     @MethodSource("argsProviderFactoryEmptyField")
@@ -151,23 +166,24 @@ public class CreatingCustomerTest {
     }
 
     @Test
-    @DisplayName("Создание клиента со всеми полями, включая loyalty")
-    @Description("Создание клиента с заполнением всех полей валидными значениями")
+    @DisplayName("Создание клиента со всеми полями, кроме дат")
+    @Description("Создание клиента с заполнением всех полей, кроме дат, валидными значениями")
     public void createNewCustomerWithLoyalty() {
-        String requestBody = DataProvider.getTestData("src/main/resources/request/post_request/create-customer-with-loyalty.json");
         String phoneNumber = getPhoneNumber();
+        Loyalty loyalty = new Loyalty("12345", "notStatus", 98765);
+        Customer customerRequest = new Customer(2, "Ivan", "Petrov", phoneNumber, "ivanpetr@mail.ru", "2012-09-11", loyalty, null);
+
+        String requestBody = SerializingCustomer.getJson(customerRequest);
+
         int expectedStatusCode = 201;
 
         LocalDateTime nowTime = LocalDateTime.now();
 
         Response responseBody = createCustomer(requestBody, phoneNumber);
+        responseBody.then().statusCode(expectedStatusCode);
+        Customer customerResponse = SerializingCustomer.getCustomer(responseBody);
 
-        ResponseValidationPositive.validateFields(requestBody, responseBody, phoneNumber, nowTime, expectedStatusCode);
-        responseBody.then()
-                .assertThat()
-                .body("loyalty.bonusCardNumber", not(equalTo("1234567")))
-                .body("loyalty.status", not(equalTo("my status")))
-                .body("loyalty.discountRate", not(equalTo(1234)));
+        CustomerObjectValidate.validateFields(customerRequest, customerResponse, phoneNumber, nowTime);
     }
 
     @Test
@@ -205,7 +221,7 @@ public class CreatingCustomerTest {
         ResponseValidationNegativeSeveralLines.validateFields(responseBody, expectedStatusCode, responseTime, path);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "Создание клиента с номером телефона {0}")
     @DisplayName("Создание клиента с параметризацией phoneNumber, негативные тесты")
     @Description("Создание клиента с параметризацией phoneNumber, негативные тесты")
     @MethodSource("argsProviderFactoryPhoneNumber")
@@ -243,5 +259,93 @@ public class CreatingCustomerTest {
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
         ResponseValidationNegativeSeveralLines.validateFields(responseBody, expectedStatusCode, responseTime, path);
+    }
+
+    @Test
+    @DisplayName("Запрос без тела")
+    @Description("Запрос с пустым телом")
+    public void createNewCustomerWithEmptyBody() {
+        String requestBody = DataProvider.getTestData("src/main/resources/request/post_request/empty-request.json");
+        String phoneNumber = getPhoneNumber();
+        int statusCode = 400;
+        String path = EndPoints.CREATE_CUSTOMERS.getPath();
+
+        Response responseBody = createCustomer(requestBody, phoneNumber);
+
+        String responseTime = responseBody.then().extract().path("timestamp").toString();
+
+        ResponseValidationNegativeSeveralLines.validateFields(responseBody, statusCode, responseTime, path);
+    }
+
+    @Test
+    @DisplayName("Запрос с телом запроса в формате xml")
+    @Description("Запрос с телом запроса в формате xml")
+    public void createNewCustomerWithBodyXml() {
+        String requestBody = DataProvider.getTestData("src/main/resources/request/post_request/xml-body.xml");
+        String phoneNumber = getPhoneNumber();
+        int statusCode = 400;
+        String path = EndPoints.CREATE_CUSTOMERS.getPath();
+
+        Response responseBody = createCustomer(requestBody, phoneNumber);
+
+        String responseTime = responseBody.then().extract().path("timestamp").toString();
+
+        ResponseValidationNegativeSeveralLines.validateFields(responseBody, statusCode, responseTime, path);
+    }
+
+    @Test
+    @DisplayName("Запрос с лишним полем")
+    @Description("Запрос с обязательными параметрами и лишним полем")
+    public void createNewCustomerWithExtraField() {
+        String requestBody = DataProvider.getTestData("src/main/resources/request/post_request/create-customer-required-with-extra-field.json");
+        String phoneNumber = getPhoneNumber();
+        int statusCode = 201;
+
+        Response responseBody = createCustomer(requestBody, phoneNumber);
+        String responseBodyAsString = responseBody.getBody().asString();
+
+        responseBody.then().statusCode(statusCode);
+        assertFalse(responseBodyAsString.contains("eyeColor"));
+    }
+
+    @ParameterizedTest(name = "Создание клиента с email {0}")
+    //тесты с некорректными емэилами ("ivanpetr@mail", "ivanpetr@mail.hi", "ivanpetr@abcd.ru") возвращают код 201 вместо 400
+    @DisplayName("Создание клиента с параметризацией email, негативные тесты")
+    @Description("Создание клиента с параметризацией email, негативные тесты")
+    @MethodSource("argsProviderFactoryEmailNegative")
+    public void createNewCustomerWithParametersOfEmailNegative(String argument) {
+        String requestBody = DataProvider.getTestData("src/main/resources/request/post_request/create-customer-required-fields-and-email.json");
+        String phoneNumber = getPhoneNumber();
+        int statusCode = 400;
+        String errorMessage = "Incorrect email";
+
+        Response responseBody = createCustomer(requestBody.replace("ivanpetr@mail.ru", argument), phoneNumber);
+
+        ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
+    }
+
+    static Stream<String> argsProviderFactoryEmailNegative() {
+        return Stream.of("Email", "@mail.ru", "ivanpetr@mail", "ivanpetr@mail.hi", "ivanpetrmail.ru", "ivanpetr@abcd.ru");
+    }
+
+    @ParameterizedTest(name = "Создание клиента с датой рождения {0}")
+    // даты рождения в далеком прошлом и в будущем успешно проходят
+    @DisplayName("Создание клиента с параметризацией dateOfBirth, негативные тесты")
+    @Description("Создание клиента с параметризацией dateOfBirth, негативные тесты")
+    @MethodSource("argsProviderFactoryDateOfBirthNegative")
+    public void createNewCustomerWithParametersOfDateOfBirthNegative(String argument) {
+        String requestBody = DataProvider.getTestData("src/main/resources/request/post_request/create-customer-required-fields-and-dateOfBirth.json");
+        String phoneNumber = getPhoneNumber();
+        int statusCode = 400;
+        String path = EndPoints.CREATE_CUSTOMERS.getPath();
+
+        Response responseBody = createCustomer(requestBody.replace("2020-09-11", argument), phoneNumber);
+        String responseTime = responseBody.then().extract().path("timestamp").toString();
+
+        ResponseValidationNegativeSeveralLines.validateFields(responseBody, statusCode, responseTime, path);
+    }
+
+    static Stream<String> argsProviderFactoryDateOfBirthNegative() {
+        return Stream.of("11-09-2020", "11 09 2020", "2025-09-11", "2020_09_11", "20-09-11", "2020-09-41", "2020-13-11", "1800-09-11", "09-11", "2020-11", "2020-26");
     }
 }

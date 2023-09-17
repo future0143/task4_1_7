@@ -1,6 +1,6 @@
 package test;
 
-import config.ApiConfig;
+import config.ApiConfigSetup;
 import config.DataProvider;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
@@ -13,14 +13,9 @@ import static method_call.call_create_customer.CreateCustomer.createCustomer;
 import static method_call.call_delete_customer.DeleteCustomerById.deleteCustomer;
 import static utils.GeneratorPhoneNumber.getPhoneNumber;
 
-public class DeletingCustomerByIDTest {
+public class DeletingCustomerByIDTest implements ApiConfigSetup {
 
     private static int id;
-
-    @BeforeAll
-    public static void setUp() {
-        ApiConfig.setUp();
-    }
 
     @BeforeEach
     void creatingCustomer() {

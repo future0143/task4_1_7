@@ -1,4 +1,4 @@
-package matcher;
+package validator.matcher;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;

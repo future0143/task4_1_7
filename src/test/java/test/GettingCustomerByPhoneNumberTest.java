@@ -1,6 +1,6 @@
 package test;
 
-import config.ApiConfig;
+import config.ApiConfigSetup;
 import config.DataProvider;
 import io.restassured.response.Response;
 import jdk.jfr.Description;
@@ -19,17 +19,12 @@ import static method_call.call_delete_customer.DeleteCustomerById.deleteCustomer
 import static method_call.call_get_byPhoneNumber.GetCustomerByPhoneNumber.getCustomerByPhoneNumber;
 import static utils.GeneratorPhoneNumber.getPhoneNumber;
 
-public class GettingCustomerByPhoneNumberTest {
+public class GettingCustomerByPhoneNumberTest implements ApiConfigSetup {
 
     private static int id;
     private static String requestBody;
     private static String phoneNumber;
     private static LocalDateTime nowTime;
-
-    @BeforeAll
-    public static void setUp() {
-        ApiConfig.setUp();
-    }
 
     @BeforeEach
     void creatingCustomer() {
@@ -47,11 +42,11 @@ public class GettingCustomerByPhoneNumberTest {
     @DisplayName("Получение клиента по существующему номеру телефона")
     @Description("Получение созданного клиента по его номеру телефона")
     public void getCustomerByExistingPhoneNumber() {
-        int expectedStatusCode = 200;
+        int statusCode = 200;
 
         Response responseBody = getCustomerByPhoneNumber(phoneNumber);
 
-        ResponseValidationPositive.validateFields(requestBody, responseBody, phoneNumber, nowTime, expectedStatusCode);
+        ResponseValidationPositive.validateFields(requestBody, responseBody, statusCode, nowTime, phoneNumber);
     }
 
     @Test
@@ -67,7 +62,7 @@ public class GettingCustomerByPhoneNumberTest {
         ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
     }
 
-    @ParameterizedTest
+    @ParameterizedTest(name = "Получение клиента с номером телефона {0}")
     @DisplayName("Получение клиента с параметризацией phoneNumber, негативные тесты")
     @Description("Получение клиента с параметризацией phoneNumber, негативные тесты")
     @MethodSource("argsProviderFactoryPhoneNumber")
