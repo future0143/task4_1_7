@@ -1,8 +1,8 @@
 package test;
 
+import static method_call.call_create_customer.CreateCustomer.createCustomerResponse;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static utils.GeneratorPhoneNumber.getPhoneNumber;
-import static method_call.call_create_customer.CreateCustomer.createCustomer;
 
 import config.ApiConfigSetup;
 import config.DataProvider;
@@ -18,7 +18,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import utils.GeneratorPhoneNumber;
 import config.EndPoints;
-import validator.*;
+import validator.response_validator.ResponseValidationNegativeOneLine;
+import validator.response_validator.ResponseValidationNegativeSeveralLines;
+import validator.response_validator.ResponseValidationPositive;
 
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
@@ -36,7 +38,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
 
         LocalDateTime nowTime = LocalDateTime.now();
 
-        Response responseBody = createCustomer(requestBody, phoneNumber);
+        Response responseBody = createCustomerResponse(requestBody, phoneNumber);
 
         ResponseValidationPositive.validateFields(requestBody, responseBody, statusCode, nowTime, phoneNumber);
     }
@@ -53,14 +55,15 @@ public class CreatingCustomerTest implements ApiConfigSetup {
     @MethodSource("argsProviderFactoryFirstName")
     public void createNewCustomerWithParametersOfFirstName(String argument) {
         String requestBody = DataProvider.getTestData("src/main/resources/request/post_request/create-customer-required-fields.json");
+        String newRequest = requestBody.replace("Ivan", argument);
         String phoneNumber = getPhoneNumber();
         int statusCode = 201;
 
         LocalDateTime nowTime = LocalDateTime.now();
 
-        Response responseBody = createCustomer(requestBody.replace("Ivan", argument), phoneNumber);
+        Response responseBody = createCustomerResponse(newRequest, phoneNumber);
 
-        ResponseValidationPositive.validateFields(requestBody, responseBody, statusCode, nowTime, phoneNumber, argument);
+        ResponseValidationPositive.validateFields(newRequest, responseBody, statusCode, nowTime, phoneNumber);
     }
 
     static Stream<String> argsProviderFactoryFirstName() {
@@ -73,14 +76,15 @@ public class CreatingCustomerTest implements ApiConfigSetup {
     @MethodSource("argsProviderFactoryLastName")
     public void createNewCustomerWithParametersOfLastName(String argument) {
         String requestBody = DataProvider.getTestData("src/main/resources/request/post_request/create-customer-required-fields.json");
+        String newRequest = requestBody.replace("Petrov", argument);
         String phoneNumber = getPhoneNumber();
         int statusCode = 201;
 
         LocalDateTime nowTime = LocalDateTime.now();
 
-        Response responseBody = createCustomer(requestBody.replace("Petrov", argument), phoneNumber);
+        Response responseBody = createCustomerResponse(newRequest, phoneNumber);
 
-        ResponseValidationPositive.validateFields(requestBody, responseBody, statusCode, nowTime, phoneNumber, argument);
+        ResponseValidationPositive.validateFields(newRequest, responseBody, statusCode, nowTime, phoneNumber);
     }
 
     static Stream<String> argsProviderFactoryLastName() {
@@ -93,18 +97,38 @@ public class CreatingCustomerTest implements ApiConfigSetup {
     @MethodSource("argsProviderFactoryEmailPositive")
     public void createNewCustomerWithParametersOfEmailPositive(String argument) {
         String requestBody = DataProvider.getTestData("src/main/resources/request/post_request/create-customer-required-fields-and-email.json");
+        String newRequest = requestBody.replace("ivanpetr@mail.ru", argument);
         String phoneNumber = getPhoneNumber();
         int statusCode = 201;
 
         LocalDateTime nowTime = LocalDateTime.now();
 
-        Response responseBody = createCustomer(requestBody.replace("ivanpetr@mail.ru", argument), phoneNumber);
+        Response responseBody = createCustomerResponse(newRequest, phoneNumber);
 
-        ResponseValidationPositive.validateFields(requestBody, responseBody, statusCode, nowTime, phoneNumber, argument);
+        ResponseValidationPositive.validateFields(newRequest, responseBody, statusCode, nowTime, phoneNumber);
     }
 
     static Stream<String> argsProviderFactoryEmailPositive() {
         return Stream.of("ivan-petr@mail.ru", "ivan-petr@mail.ru", "i@mail.ru", "ivanpetr@mail.com", "ivanpetr@gmail.com");
+    }
+
+    @Test
+    @DisplayName("Создание клиента со всеми полями, кроме дат")
+    @Description("Создание клиента с заполнением всех полей, кроме дат, валидными значениями")
+    public void createNewCustomerWithLoyalty() {
+        String phoneNumber = getPhoneNumber();
+        Loyalty loyalty = new Loyalty("12345", "notStatus", 98765);
+        Customer customerRequest = new Customer(2, "Ivan", "Petrov", phoneNumber, "ivanpetr@mail.ru", "2012-09-11", loyalty, null);
+
+        String requestBody = SerializingCustomer.getJson(customerRequest);
+
+        int expectedStatusCode = 201;
+
+        LocalDateTime nowTime = LocalDateTime.now();
+
+        Customer responseBody = SerializingCustomer.getCustomer(createCustomerResponse(requestBody, phoneNumber));
+
+        ResponseValidationPositive.validateFields(requestBody, createCustomerResponse(requestBody, phoneNumber), expectedStatusCode, nowTime, phoneNumber);
     }
 
     @Test
@@ -116,9 +140,9 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         String errorMessage = "The phone number is already registered";
         int statusCode = 400;
 
-        createCustomer(requestBody, phoneNumber);
+        createCustomerResponse(requestBody, phoneNumber);
 
-        Response responseBody = createCustomer(requestBody, phoneNumber);
+        Response responseBody = createCustomerResponse(requestBody, phoneNumber);
 
         ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
     }
@@ -133,7 +157,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         String phoneNumber = getPhoneNumber();
         int statusCode = 400;
 
-        Response responseBody = createCustomer(requestBody.replace(SerializingCustomer.getCustomerFromRequestBody(requestBody).get(argument), ""), phoneNumber);
+        Response responseBody = createCustomerResponse(requestBody.replace(SerializingCustomer.getCustomerFromRequestBody(requestBody).get(argument), ""), phoneNumber);
 
         ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
     }
@@ -154,7 +178,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         String errorMessage = "Mandatory field missing: " + argumentErrorMessage;
         int statusCode = 400;
 
-        Response responseBody = createCustomer(requestBody, phoneNumber);
+        Response responseBody = createCustomerResponse(requestBody, phoneNumber);
 
         ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
     }
@@ -163,27 +187,6 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         return Stream.of(Arguments.of("src/main/resources/request/post_request/create-customer-without-firstName.json", "firstName"),
                 Arguments.of("src/main/resources/request/post_request/create-customer-without-lastName.json", "lastName"),
                 Arguments.of("src/main/resources/request/post_request/create-customer-without-phoneNumber.json", "phoneNumber"));
-    }
-
-    @Test
-    @DisplayName("Создание клиента со всеми полями, кроме дат")
-    @Description("Создание клиента с заполнением всех полей, кроме дат, валидными значениями")
-    public void createNewCustomerWithLoyalty() {
-        String phoneNumber = getPhoneNumber();
-        Loyalty loyalty = new Loyalty("12345", "notStatus", 98765);
-        Customer customerRequest = new Customer(2, "Ivan", "Petrov", phoneNumber, "ivanpetr@mail.ru", "2012-09-11", loyalty, null);
-
-        String requestBody = SerializingCustomer.getJson(customerRequest);
-
-        int expectedStatusCode = 201;
-
-        LocalDateTime nowTime = LocalDateTime.now();
-
-        Response responseBody = createCustomer(requestBody, phoneNumber);
-        responseBody.then().statusCode(expectedStatusCode);
-        Customer customerResponse = SerializingCustomer.getCustomer(responseBody);
-
-        CustomerObjectValidate.validateFields(customerRequest, customerResponse, phoneNumber, nowTime);
     }
 
     @Test
@@ -199,7 +202,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         int expectedStatusCode = 400;
         String path = EndPoints.CREATE_CUSTOMERS.getPath();
 
-        Response responseBody = createCustomer(requestBody, phoneNumber);
+        Response responseBody = createCustomerResponse(requestBody, phoneNumber);
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
         ResponseValidationNegativeSeveralLines.validateFields(responseBody, expectedStatusCode, responseTime, path);
@@ -215,7 +218,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         int expectedStatusCode = 400;
         String path = EndPoints.CREATE_CUSTOMERS.getPath();
 
-        Response responseBody = createCustomer(requestBody, phoneNumber);
+        Response responseBody = createCustomerResponse(requestBody, phoneNumber);
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
         ResponseValidationNegativeSeveralLines.validateFields(responseBody, expectedStatusCode, responseTime, path);
@@ -230,7 +233,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         String errorMessage = "Invalid phoneNumber: expected format +7XXXXXXXXXX";
         int statusCode = 400;
 
-        Response responseBody = createCustomer(requestBody, argument);
+        Response responseBody = createCustomerResponse(requestBody, argument);
 
         ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
     }
@@ -254,7 +257,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         String path = EndPoints.CREATE_CUSTOMERS.getPath();
         int expectedStatusCode = 400;
 
-        Response responseBody = createCustomer(requestBody, phoneNumber);
+        Response responseBody = createCustomerResponse(requestBody, phoneNumber);
 
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
@@ -270,7 +273,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         int statusCode = 400;
         String path = EndPoints.CREATE_CUSTOMERS.getPath();
 
-        Response responseBody = createCustomer(requestBody, phoneNumber);
+        Response responseBody = createCustomerResponse(requestBody, phoneNumber);
 
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
@@ -286,7 +289,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         int statusCode = 400;
         String path = EndPoints.CREATE_CUSTOMERS.getPath();
 
-        Response responseBody = createCustomer(requestBody, phoneNumber);
+        Response responseBody = createCustomerResponse(requestBody, phoneNumber);
 
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
@@ -301,7 +304,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         String phoneNumber = getPhoneNumber();
         int statusCode = 201;
 
-        Response responseBody = createCustomer(requestBody, phoneNumber);
+        Response responseBody = createCustomerResponse(requestBody, phoneNumber);
         String responseBodyAsString = responseBody.getBody().asString();
 
         responseBody.then().statusCode(statusCode);
@@ -319,7 +322,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         int statusCode = 400;
         String errorMessage = "Incorrect email";
 
-        Response responseBody = createCustomer(requestBody.replace("ivanpetr@mail.ru", argument), phoneNumber);
+        Response responseBody = createCustomerResponse(requestBody.replace("ivanpetr@mail.ru", argument), phoneNumber);
 
         ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
     }
@@ -339,7 +342,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         int statusCode = 400;
         String path = EndPoints.CREATE_CUSTOMERS.getPath();
 
-        Response responseBody = createCustomer(requestBody.replace("2020-09-11", argument), phoneNumber);
+        Response responseBody = createCustomerResponse(requestBody.replace("2020-09-11", argument), phoneNumber);
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
         ResponseValidationNegativeSeveralLines.validateFields(responseBody, statusCode, responseTime, path);

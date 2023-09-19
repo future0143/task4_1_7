@@ -1,4 +1,4 @@
-package validator;
+package validator.response_validator;
 
 import io.restassured.module.jsv.JsonSchemaValidator;
 import io.restassured.response.Response;

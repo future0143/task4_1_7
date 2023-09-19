@@ -6,10 +6,10 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import jdk.jfr.Description;
 import org.junit.jupiter.api.*;
-import validator.ResponseValidationNegativeOneLine;
-import validator.ResponseValidationNegativeSeveralLines;
+import validator.response_validator.ResponseValidationNegativeOneLine;
+import validator.response_validator.ResponseValidationNegativeSeveralLines;
 
-import static method_call.call_create_customer.CreateCustomer.createCustomer;
+import static method_call.call_create_customer.CreateCustomer.createCustomerResponse;
 import static method_call.call_delete_customer.DeleteCustomerById.deleteCustomer;
 import static utils.GeneratorPhoneNumber.getPhoneNumber;
 
@@ -22,7 +22,7 @@ public class DeletingCustomerByIDTest implements ApiConfigSetup {
         String requestBody = DataProvider.getTestData("src/main/resources/request/post_request/create-customer-required-fields.json");
         String phoneNumber = getPhoneNumber();
 
-        Response responseBody = createCustomer(requestBody, phoneNumber);
+        Response responseBody = createCustomerResponse(requestBody, phoneNumber);
 
         id = responseBody.then().extract().path("id");
     }

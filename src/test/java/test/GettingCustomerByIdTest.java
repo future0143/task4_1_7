@@ -6,13 +6,13 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import jdk.jfr.Description;
 import org.junit.jupiter.api.*;
-import validator.ResponseValidationNegativeOneLine;
-import validator.ResponseValidationNegativeSeveralLines;
-import validator.ResponseValidationPositive;
+import validator.response_validator.ResponseValidationNegativeOneLine;
+import validator.response_validator.ResponseValidationNegativeSeveralLines;
+import validator.response_validator.ResponseValidationPositive;
 
 import java.time.LocalDateTime;
 
-import static method_call.call_create_customer.CreateCustomer.createCustomer;
+import static method_call.call_create_customer.CreateCustomer.createCustomerResponse;
 import static method_call.call_delete_customer.DeleteCustomerById.deleteCustomer;
 import static method_call.call_get_byId_customer.GetCustomerById.getCustomerById;
 import static utils.GeneratorPhoneNumber.getPhoneNumber;
@@ -32,7 +32,7 @@ public class GettingCustomerByIdTest implements ApiConfigSetup {
 
             nowTime = LocalDateTime.now();
 
-            Response responseBody = createCustomer(requestBody, phoneNumber);
+            Response responseBody = createCustomerResponse(requestBody, phoneNumber);
 
             id = responseBody.then().extract().path("id");
         }

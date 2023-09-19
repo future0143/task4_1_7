@@ -8,13 +8,13 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import utils.GeneratorPhoneNumber;
-import validator.ResponseValidationNegativeOneLine;
-import validator.ResponseValidationPositive;
+import validator.response_validator.ResponseValidationNegativeOneLine;
+import validator.response_validator.ResponseValidationPositive;
 
 import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
-import static method_call.call_create_customer.CreateCustomer.createCustomer;
+import static method_call.call_create_customer.CreateCustomer.createCustomerResponse;
 import static method_call.call_delete_customer.DeleteCustomerById.deleteCustomer;
 import static method_call.call_get_byPhoneNumber.GetCustomerByPhoneNumber.getCustomerByPhoneNumber;
 import static utils.GeneratorPhoneNumber.getPhoneNumber;
@@ -33,7 +33,7 @@ public class GettingCustomerByPhoneNumberTest implements ApiConfigSetup {
 
         nowTime = LocalDateTime.now();
 
-        Response responseBody = createCustomer(requestBody, phoneNumber);
+        Response responseBody = createCustomerResponse(requestBody, phoneNumber);
 
         id = responseBody.then().extract().path("id");
     }

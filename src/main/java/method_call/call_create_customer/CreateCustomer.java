@@ -7,7 +7,7 @@ import templates.get_request_specification.CreateCustomerRequestSpecification;
 
 public class CreateCustomer {
 
-    public static Response createCustomer(String requestBody, String phoneNumber) {
+    public static Response createCustomerResponse(String requestBody, String phoneNumber) {
         return RestAssured.given().spec(CreateCustomerRequestSpecification.setupRequestSpecification(requestBody, phoneNumber))
                 .post(EndPoints.CREATE_CUSTOMERS.getPath());
     }
