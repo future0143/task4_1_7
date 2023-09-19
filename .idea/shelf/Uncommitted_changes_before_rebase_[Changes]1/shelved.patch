@@ -1,0 +1,88 @@
+Index: src/main/java/db/DatabaseManager.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/db/DatabaseManager.java b/src/main/java/db/DatabaseManager.java
+new file mode 100644
+--- /dev/null	(date 1695146453929)
++++ b/src/main/java/db/DatabaseManager.java	(date 1695146453929)
+@@ -0,0 +1,29 @@
++package db;
++
++import config.TestProperties;
++import org.sql2o.Connection;
++import org.sql2o.Query;
++import org.sql2o.Sql2o;
++
++import java.util.HashMap;
++import java.util.List;
++import java.util.Map;
++
++public class DatabaseManager {
++    private static final Sql2o sql2o = new Sql2o(TestProperties.getValue("db.url"),
++            TestProperties.getValue("db.username"),
++            TestProperties.getValue("db.password"));
++
++    public static Map<String, Object> selectCustomer(String phoneNumber) {
++        try (Connection connection = sql2o.open();
++             Query query = connection.createQuery("select  * from customer where phone_number = :phone_number")
++                     .addParameter("phone_number", phoneNumber)) {
++            List<Map<String, Object>> result = query.executeAndFetchTable().asList();
++            if (result.isEmpty()) {
++                return new HashMap<>();
++            } else {
++                return result.get(0);
++            }
++        }
++    }
++}
+Index: src/main/java/validator/database_validator/DatabaseValidation.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/validator/database_validator/DatabaseValidation.java b/src/main/java/validator/database_validator/DatabaseValidation.java
+new file mode 100644
+--- /dev/null	(date 1695129662815)
++++ b/src/main/java/validator/database_validator/DatabaseValidation.java	(date 1695129662815)
+@@ -0,0 +1,39 @@
++package validator.database_validator;
++
++import config.SerializingCustomer;
++import io.restassured.http.ContentType;
++import io.restassured.module.jsv.JsonSchemaValidator;
++import io.restassured.response.Response;
++import org.hamcrest.Matchers;
++import org.junit.jupiter.api.Assertions;
++import validator.matcher.DateMatchers;
++
++import java.time.LocalDateTime;
++import java.util.Map;
++
++public class DatabaseValidation {
++    public static void validateTable (String requestBody, Map<String, Object> customerData) {
++        Assertions.assertEquals(SerializingCustomer.getCustomerFromRequestBody(requestBody).getId(), customerData.get("id"));
++    }
++//    public static void validateFields(String requestBody, Map<String, Object> customerData, int statusCode, LocalDateTime nowTime, String phoneNumber, String... expectedFields) {
++//        for (String columnName : customerData.keySet()) {
++//            switch (columnName) {
++//                case "first_name" ->  Assertions.assertEquals(expectedFields[0], customerData.get(columnName));
++//                case "lastName" -> Assertions.assertEquals(expectedFields[0], customerData.get(field));
++//
++//                case "phoneNumber" -> Assertions.assertEquals(phoneNumber, customerData.get("phone_number"));
++//
++//                case "id" -> Assertions.assertEquals(SerializingCustomer.getCustomerFromRequestBody(requestBody).getId(), customerData.get("id"));
++//
++//                case "email" -> Assertions.assertEquals(SerializingCustomer.getCustomerFromRequestBody(requestBody).getId(), customerData.get("email"));
++//
++//                case "dateOfBirth" ->
++//                        Assertions.assertEquals(SerializingCustomer.getCustomerFromRequestBody(requestBody).getId(), customerData.get("date_of_birth"));
++//                case "loyalty.status", "loyalty.bonusCardNumber", "loyalty.discountRate" ->
++//                        Assertions.assertNotNull(customerData.get("id"));
++//                case "shopCode" -> responseBody.then().body(field, Matchers.nullValue());
++//                case "updatedAt", "createdAt" -> responseBody.then().body(field, DateMatchers.isAfter(nowTime));
++//            }
++//        }
++//    }
++}
