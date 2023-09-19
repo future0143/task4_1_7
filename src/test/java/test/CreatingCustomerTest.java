@@ -6,6 +6,7 @@ import static utils.GeneratorPhoneNumber.getPhoneNumber;
 
 import config.ApiConfigSetup;
 import config.DataProvider;
+import db.DatabaseManager;
 import io.restassured.response.Response;
 import jdk.jfr.Description;
 import model.Customer;
@@ -18,11 +19,13 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import utils.GeneratorPhoneNumber;
 import config.EndPoints;
+import validator.database_validator.DatabaseValidation;
 import validator.response_validator.ResponseValidationNegativeOneLine;
 import validator.response_validator.ResponseValidationNegativeSeveralLines;
 import validator.response_validator.ResponseValidationPositive;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class CreatingCustomerTest implements ApiConfigSetup {
@@ -39,8 +42,15 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         LocalDateTime nowTime = LocalDateTime.now();
 
         Response responseBody = createCustomerResponse(requestBody, phoneNumber);
+        String bonusCardNumber = responseBody.then().extract().path("loyalty.bonusCardNumber");
 
         ResponseValidationPositive.validateFields(requestBody, responseBody, statusCode, nowTime, phoneNumber);
+
+        Map<String, Object> customerData = DatabaseManager.selectCustomer(phoneNumber);
+        DatabaseValidation.validateTableCustomer(requestBody, customerData, phoneNumber);
+
+        Map<String, Object> customerDataLoyalty = DatabaseManager.selectLoyalty(bonusCardNumber);
+        DatabaseValidation.validateTableLoyalty(customerDataLoyalty);
     }
 
     static Stream<String> argsProviderFactoryRequestBody() {
@@ -62,8 +72,15 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         LocalDateTime nowTime = LocalDateTime.now();
 
         Response responseBody = createCustomerResponse(newRequest, phoneNumber);
+        String bonusCardNumber = responseBody.then().extract().path("loyalty.bonusCardNumber");
 
         ResponseValidationPositive.validateFields(newRequest, responseBody, statusCode, nowTime, phoneNumber);
+
+        Map<String, Object> customerData = DatabaseManager.selectCustomer(phoneNumber);
+        DatabaseValidation.validateTableCustomer(newRequest, customerData, phoneNumber);
+
+        Map<String, Object> customerDataLoyalty = DatabaseManager.selectLoyalty(bonusCardNumber);
+        DatabaseValidation.validateTableLoyalty(customerDataLoyalty);
     }
 
     static Stream<String> argsProviderFactoryFirstName() {
@@ -85,6 +102,14 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         Response responseBody = createCustomerResponse(newRequest, phoneNumber);
 
         ResponseValidationPositive.validateFields(newRequest, responseBody, statusCode, nowTime, phoneNumber);
+
+        String bonusCardNumber = responseBody.then().extract().path("loyalty.bonusCardNumber");
+
+        Map<String, Object> customerData = DatabaseManager.selectCustomer(phoneNumber);
+        DatabaseValidation.validateTableCustomer(newRequest, customerData, phoneNumber);
+
+        Map<String, Object> customerDataLoyalty = DatabaseManager.selectLoyalty(bonusCardNumber);
+        DatabaseValidation.validateTableLoyalty(customerDataLoyalty);
     }
 
     static Stream<String> argsProviderFactoryLastName() {
@@ -106,6 +131,14 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         Response responseBody = createCustomerResponse(newRequest, phoneNumber);
 
         ResponseValidationPositive.validateFields(newRequest, responseBody, statusCode, nowTime, phoneNumber);
+
+        String bonusCardNumber = responseBody.then().extract().path("loyalty.bonusCardNumber");
+
+        Map<String, Object> customerData = DatabaseManager.selectCustomer(phoneNumber);
+        DatabaseValidation.validateTableCustomer(newRequest, customerData, phoneNumber);
+
+        Map<String, Object> customerDataLoyalty = DatabaseManager.selectLoyalty(bonusCardNumber);
+        DatabaseValidation.validateTableLoyalty(customerDataLoyalty);
     }
 
     static Stream<String> argsProviderFactoryEmailPositive() {
@@ -118,7 +151,8 @@ public class CreatingCustomerTest implements ApiConfigSetup {
     public void createNewCustomerWithLoyalty() {
         String phoneNumber = getPhoneNumber();
         Loyalty loyalty = new Loyalty("12345", "notStatus", 98765);
-        Customer customerRequest = new Customer(2, "Ivan", "Petrov", phoneNumber, "ivanpetr@mail.ru", "2012-09-11", loyalty, null);
+        Customer customerRequest = new Customer(2, "Ivan", "Petrov", phoneNumber,
+                "ivanpetr@mail.ru", "2012-09-11", loyalty, null);
 
         String requestBody = SerializingCustomer.getJson(customerRequest);
 
@@ -126,9 +160,17 @@ public class CreatingCustomerTest implements ApiConfigSetup {
 
         LocalDateTime nowTime = LocalDateTime.now();
 
-        Customer responseBody = SerializingCustomer.getCustomer(createCustomerResponse(requestBody, phoneNumber));
+        Response responseBody = createCustomerResponse(requestBody, phoneNumber);
 
-        ResponseValidationPositive.validateFields(requestBody, createCustomerResponse(requestBody, phoneNumber), expectedStatusCode, nowTime, phoneNumber);
+        ResponseValidationPositive.validateFields(requestBody, responseBody, expectedStatusCode, nowTime, phoneNumber);
+
+        String bonusCardNumber = responseBody.then().extract().path("loyalty.bonusCardNumber");
+
+        Map<String, Object> customerData = DatabaseManager.selectCustomer(phoneNumber);
+        DatabaseValidation.validateTableCustomer(requestBody, customerData, phoneNumber);
+
+        Map<String, Object> customerDataLoyalty = DatabaseManager.selectLoyalty(bonusCardNumber);
+        DatabaseValidation.validateTableLoyalty(customerDataLoyalty);
     }
 
     @Test
@@ -303,12 +345,21 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         String requestBody = DataProvider.getTestData("src/main/resources/request/post_request/create-customer-required-with-extra-field.json");
         String phoneNumber = getPhoneNumber();
         int statusCode = 201;
+        LocalDateTime nowTime = LocalDateTime.now();
 
         Response responseBody = createCustomerResponse(requestBody, phoneNumber);
         String responseBodyAsString = responseBody.getBody().asString();
 
         responseBody.then().statusCode(statusCode);
         assertFalse(responseBodyAsString.contains("eyeColor"));
+
+        String bonusCardNumber = responseBody.then().extract().path("loyalty.bonusCardNumber");
+
+//        Map<String, Object> customerData = DatabaseManager.selectCustomer(phoneNumber);
+//        DatabaseValidation.validateTableCustomer(requestBody, customerData,phoneNumber,nowTime);
+//     проверить, что в базе данных не появилось лишнего столбца
+        Map<String, Object> customerDataLoyalty = DatabaseManager.selectLoyalty(bonusCardNumber);
+        DatabaseValidation.validateTableLoyalty(customerDataLoyalty);
     }
 
     @ParameterizedTest(name = "Создание клиента с email {0}")

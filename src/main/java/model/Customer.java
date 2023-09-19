@@ -10,8 +10,8 @@ public class Customer {
     private String dateOfBirth;
     private Loyalty loyalty;
     private String shopCode;
-private String updatedAt;
-private String createdAt;
+    private String updatedAt;
+    private String createdAt;
 
     public Customer(int id, String firstName, String lastName, String phoneNumber, String email, String dateOfBirth, Loyalty loyalty, String shopCode) {
         this.id = id;
