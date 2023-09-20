@@ -1,5 +1,10 @@
 package model;
 
+import lombok.*;
+
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 public class Customer {
 
     private int id;
@@ -10,8 +15,8 @@ public class Customer {
     private String dateOfBirth;
     private Loyalty loyalty;
     private String shopCode;
-private String updatedAt;
-private String createdAt;
+    private String updatedAt;
+    private String createdAt;
 
     public Customer(int id, String firstName, String lastName, String phoneNumber, String email, String dateOfBirth, Loyalty loyalty, String shopCode) {
         this.id = id;
@@ -22,49 +27,6 @@ private String createdAt;
         this.dateOfBirth = dateOfBirth;
         this.loyalty = loyalty;
         this.shopCode = shopCode;
-    }
-
-    public Customer() {
-    }
-
-    public String getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public String getCreatedAt() {
-        return createdAt;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public Loyalty getLoyalty() {
-        return loyalty;
-    }
-
-    public String getShopCode() {
-        return shopCode;
     }
 
     public String get(String argument) {

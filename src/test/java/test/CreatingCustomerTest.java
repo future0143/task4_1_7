@@ -1,6 +1,6 @@
 package test;
 
-import static method_call.call_create_customer.CreateCustomer.createCustomerResponse;
+import static method_call.CustomersRequestHandler.createCustomerResponse;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static utils.GeneratorPhoneNumber.getPhoneNumber;
 
@@ -18,8 +18,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import utils.GeneratorPhoneNumber;
 import config.EndPoints;
-import validator.response_validator.ResponseValidationNegativeOneLine;
-import validator.response_validator.ResponseValidationNegativeSeveralLines;
+import validator.response_validator.ResponseValidationNegative;
 import validator.response_validator.ResponseValidationPositive;
 
 import java.time.LocalDateTime;
@@ -126,9 +125,9 @@ public class CreatingCustomerTest implements ApiConfigSetup {
 
         LocalDateTime nowTime = LocalDateTime.now();
 
-        Customer responseBody = SerializingCustomer.getCustomer(createCustomerResponse(requestBody, phoneNumber));
+        Response responseBody = createCustomerResponse(requestBody, phoneNumber);
 
-        ResponseValidationPositive.validateFields(requestBody, createCustomerResponse(requestBody, phoneNumber), expectedStatusCode, nowTime, phoneNumber);
+        ResponseValidationPositive.validateFields(requestBody, responseBody, expectedStatusCode, nowTime, phoneNumber);
     }
 
     @Test
@@ -144,7 +143,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
 
         Response responseBody = createCustomerResponse(requestBody, phoneNumber);
 
-        ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
+        ResponseValidationNegative.validateOneField(responseBody, errorMessage, statusCode);
     }
 
 
@@ -159,7 +158,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
 
         Response responseBody = createCustomerResponse(requestBody.replace(SerializingCustomer.getCustomerFromRequestBody(requestBody).get(argument), ""), phoneNumber);
 
-        ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
+        ResponseValidationNegative.validateOneField(responseBody, errorMessage, statusCode);
     }
 
     static Stream<Arguments> argsProviderFactoryEmptyValue() {
@@ -180,7 +179,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
 
         Response responseBody = createCustomerResponse(requestBody, phoneNumber);
 
-        ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
+        ResponseValidationNegative.validateOneField(responseBody, errorMessage, statusCode);
     }
 
     static Stream<Arguments> argsProviderFactoryEmptyField() {
@@ -205,7 +204,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         Response responseBody = createCustomerResponse(requestBody, phoneNumber);
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
-        ResponseValidationNegativeSeveralLines.validateFields(responseBody, expectedStatusCode, responseTime, path);
+        ResponseValidationNegative.validateSeveralFields(responseBody, expectedStatusCode, responseTime, path);
     }
 
     @Test
@@ -221,7 +220,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         Response responseBody = createCustomerResponse(requestBody, phoneNumber);
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
-        ResponseValidationNegativeSeveralLines.validateFields(responseBody, expectedStatusCode, responseTime, path);
+        ResponseValidationNegative.validateSeveralFields(responseBody, expectedStatusCode, responseTime, path);
     }
 
     @ParameterizedTest(name = "Создание клиента с номером телефона {0}")
@@ -235,7 +234,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
 
         Response responseBody = createCustomerResponse(requestBody, argument);
 
-        ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
+        ResponseValidationNegative.validateOneField(responseBody, errorMessage, statusCode);
     }
 
     static Stream<String> argsProviderFactoryPhoneNumber() {
@@ -261,7 +260,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
 
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
-        ResponseValidationNegativeSeveralLines.validateFields(responseBody, expectedStatusCode, responseTime, path);
+        ResponseValidationNegative.validateSeveralFields(responseBody, expectedStatusCode, responseTime, path);
     }
 
     @Test
@@ -277,7 +276,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
 
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
-        ResponseValidationNegativeSeveralLines.validateFields(responseBody, statusCode, responseTime, path);
+        ResponseValidationNegative.validateSeveralFields(responseBody, statusCode, responseTime, path);
     }
 
     @Test
@@ -293,7 +292,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
 
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
-        ResponseValidationNegativeSeveralLines.validateFields(responseBody, statusCode, responseTime, path);
+        ResponseValidationNegative.validateSeveralFields(responseBody, statusCode, responseTime, path);
     }
 
     @Test
@@ -324,7 +323,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
 
         Response responseBody = createCustomerResponse(requestBody.replace("ivanpetr@mail.ru", argument), phoneNumber);
 
-        ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
+        ResponseValidationNegative.validateOneField(responseBody, errorMessage, statusCode);
     }
 
     static Stream<String> argsProviderFactoryEmailNegative() {
@@ -345,7 +344,7 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         Response responseBody = createCustomerResponse(requestBody.replace("2020-09-11", argument), phoneNumber);
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
-        ResponseValidationNegativeSeveralLines.validateFields(responseBody, statusCode, responseTime, path);
+        ResponseValidationNegative.validateSeveralFields(responseBody, statusCode, responseTime, path);
     }
 
     static Stream<String> argsProviderFactoryDateOfBirthNegative() {

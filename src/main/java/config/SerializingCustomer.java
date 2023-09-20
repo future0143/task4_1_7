@@ -16,10 +16,12 @@ public class SerializingCustomer {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+
         return jsonRequest;
     }
 
     public static Customer getCustomer(Response responseBody) {
+
         return responseBody.then().extract().as(Customer.class);
     }
 

@@ -4,12 +4,12 @@ import io.restassured.http.ContentType;
 import io.restassured.module.jsv.JsonSchemaValidator;
 import io.restassured.response.Response;
 import model.Customer;
-import org.junit.jupiter.api.Assertions;
 import validator.matcher.DateMatchers;
 import config.SerializingCustomer;
 import java.time.LocalDateTime;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ResponseValidationPositive {
 
@@ -19,16 +19,16 @@ public class ResponseValidationPositive {
         Customer requestCustomer = SerializingCustomer.getCustomerFromRequestBody(requestBody);
         Customer responseCustomer = SerializingCustomer.getCustomer(responseBody);
 
-        Assertions.assertNotNull(responseCustomer.getId());
-        Assertions.assertEquals(responseCustomer.getFirstName(), requestCustomer.getFirstName());
-        Assertions.assertEquals(responseCustomer.getLastName(), requestCustomer.getLastName());
-        Assertions.assertEquals(responseCustomer.getPhoneNumber(), phoneNumber);
-        Assertions.assertEquals(responseCustomer.getEmail(), requestCustomer.getEmail());
-        Assertions.assertEquals(responseCustomer.getDateOfBirth(), requestCustomer.getDateOfBirth());
-        Assertions.assertNotNull(responseCustomer.getLoyalty().getBonusCardNumber());
-        Assertions.assertNotNull(responseCustomer.getLoyalty().getStatus());
-        Assertions.assertNotNull(responseCustomer.getLoyalty().getDiscountRate());
-        Assertions.assertNull(responseCustomer.getShopCode());
+        assertNotNull(responseCustomer.getId());
+        assertEquals(responseCustomer.getFirstName(), requestCustomer.getFirstName());
+        assertEquals(responseCustomer.getLastName(), requestCustomer.getLastName());
+        assertEquals(responseCustomer.getPhoneNumber(), phoneNumber);
+        assertEquals(responseCustomer.getEmail(), requestCustomer.getEmail());
+        assertEquals(responseCustomer.getDateOfBirth(), requestCustomer.getDateOfBirth());
+        assertNotNull(responseCustomer.getLoyalty().getBonusCardNumber());
+        assertNotNull(responseCustomer.getLoyalty().getStatus());
+        assertNotNull(responseCustomer.getLoyalty().getDiscountRate());
+        assertNull(responseCustomer.getShopCode());
         assertThat(responseCustomer.getUpdatedAt(), DateMatchers.isAfter(nowTime));
         assertThat(responseCustomer.getCreatedAt(), DateMatchers.isAfter(nowTime));
     }
