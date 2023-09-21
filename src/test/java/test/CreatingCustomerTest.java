@@ -1,8 +1,10 @@
 package test;
 
+import static db.DatabaseManager.selectCountOfLinesInTableCustomer;
 import static method_call.call_create_customer.CreateCustomer.createCustomerResponse;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static utils.GeneratorPhoneNumber.getPhoneNumber;
+import static validator.database_validator.DatabaseValidation.validateTableIsEmpty;
 
 import config.ApiConfigSetup;
 import config.DataProvider;
@@ -44,10 +46,10 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         Response responseBody = createCustomerResponse(requestBody, phoneNumber);
         String bonusCardNumber = responseBody.then().extract().path("loyalty.bonusCardNumber");
 
-        ResponseValidationPositive.validateFields(requestBody, responseBody, statusCode, nowTime, phoneNumber);
+        ResponseValidationPositive.validateFieldsFromResponse(requestBody, responseBody, statusCode, nowTime, phoneNumber);
 
-        Map<String, Object> customerData = DatabaseManager.selectCustomer(phoneNumber);
-        DatabaseValidation.validateTableCustomer(requestBody, customerData, phoneNumber);
+        Map<String, Object> customerData = DatabaseManager.selectCustomerAsMap(phoneNumber);
+        DatabaseValidation.validateCustomerAsMap(requestBody, customerData, phoneNumber);
 
         Map<String, Object> customerDataLoyalty = DatabaseManager.selectLoyalty(bonusCardNumber);
         DatabaseValidation.validateTableLoyalty(customerDataLoyalty);
@@ -74,10 +76,10 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         Response responseBody = createCustomerResponse(newRequest, phoneNumber);
         String bonusCardNumber = responseBody.then().extract().path("loyalty.bonusCardNumber");
 
-        ResponseValidationPositive.validateFields(newRequest, responseBody, statusCode, nowTime, phoneNumber);
+        ResponseValidationPositive.validateFieldsFromResponse(newRequest, responseBody, statusCode, nowTime, phoneNumber);
 
-        Map<String, Object> customerData = DatabaseManager.selectCustomer(phoneNumber);
-        DatabaseValidation.validateTableCustomer(newRequest, customerData, phoneNumber);
+        Map<String, Object> customerData = DatabaseManager.selectCustomerAsMap(phoneNumber);
+        DatabaseValidation.validateCustomerAsMap(newRequest, customerData, phoneNumber);
 
         Map<String, Object> customerDataLoyalty = DatabaseManager.selectLoyalty(bonusCardNumber);
         DatabaseValidation.validateTableLoyalty(customerDataLoyalty);
@@ -101,12 +103,12 @@ public class CreatingCustomerTest implements ApiConfigSetup {
 
         Response responseBody = createCustomerResponse(newRequest, phoneNumber);
 
-        ResponseValidationPositive.validateFields(newRequest, responseBody, statusCode, nowTime, phoneNumber);
+        ResponseValidationPositive.validateFieldsFromResponse(newRequest, responseBody, statusCode, nowTime, phoneNumber);
 
         String bonusCardNumber = responseBody.then().extract().path("loyalty.bonusCardNumber");
 
-        Map<String, Object> customerData = DatabaseManager.selectCustomer(phoneNumber);
-        DatabaseValidation.validateTableCustomer(newRequest, customerData, phoneNumber);
+        Map<String, Object> customerData = DatabaseManager.selectCustomerAsMap(phoneNumber);
+        DatabaseValidation.validateCustomerAsMap(newRequest, customerData, phoneNumber);
 
         Map<String, Object> customerDataLoyalty = DatabaseManager.selectLoyalty(bonusCardNumber);
         DatabaseValidation.validateTableLoyalty(customerDataLoyalty);
@@ -130,12 +132,12 @@ public class CreatingCustomerTest implements ApiConfigSetup {
 
         Response responseBody = createCustomerResponse(newRequest, phoneNumber);
 
-        ResponseValidationPositive.validateFields(newRequest, responseBody, statusCode, nowTime, phoneNumber);
+        ResponseValidationPositive.validateFieldsFromResponse(newRequest, responseBody, statusCode, nowTime, phoneNumber);
 
         String bonusCardNumber = responseBody.then().extract().path("loyalty.bonusCardNumber");
 
-        Map<String, Object> customerData = DatabaseManager.selectCustomer(phoneNumber);
-        DatabaseValidation.validateTableCustomer(newRequest, customerData, phoneNumber);
+        Map<String, Object> customerData = DatabaseManager.selectCustomerAsMap(phoneNumber);
+        DatabaseValidation.validateCustomerAsMap(newRequest, customerData, phoneNumber);
 
         Map<String, Object> customerDataLoyalty = DatabaseManager.selectLoyalty(bonusCardNumber);
         DatabaseValidation.validateTableLoyalty(customerDataLoyalty);
@@ -161,16 +163,17 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         LocalDateTime nowTime = LocalDateTime.now();
 
         Response responseBody = createCustomerResponse(requestBody, phoneNumber);
+        Customer customer = SerializingCustomer.getCustomer(responseBody);
 
-        ResponseValidationPositive.validateFields(requestBody, responseBody, expectedStatusCode, nowTime, phoneNumber);
+        ResponseValidationPositive.validateFieldsFromCustomer(requestBody, responseBody,customer, expectedStatusCode, nowTime, phoneNumber);
 
         String bonusCardNumber = responseBody.then().extract().path("loyalty.bonusCardNumber");
 
-        Map<String, Object> customerData = DatabaseManager.selectCustomer(phoneNumber);
-        DatabaseValidation.validateTableCustomer(requestBody, customerData, phoneNumber);
+        Customer customerData = DatabaseManager.selectCustomer(phoneNumber);
+        ResponseValidationPositive.validateFieldsFromCustomer(requestBody, responseBody,customerData, expectedStatusCode, nowTime, phoneNumber);
 
-        Map<String, Object> customerDataLoyalty = DatabaseManager.selectLoyalty(bonusCardNumber);
-        DatabaseValidation.validateTableLoyalty(customerDataLoyalty);
+        Loyalty loyaltyData = customerData.getLoyalty();
+        DatabaseValidation.validateTableLoyalty(loyaltyData);
     }
 
     @Test
@@ -187,6 +190,9 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         Response responseBody = createCustomerResponse(requestBody, phoneNumber);
 
         ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
+
+        int countLines = selectCountOfLinesInTableCustomer();
+        validateTableIsEmpty(countLines);
     }
 
 
@@ -202,6 +208,9 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         Response responseBody = createCustomerResponse(requestBody.replace(SerializingCustomer.getCustomerFromRequestBody(requestBody).get(argument), ""), phoneNumber);
 
         ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
+
+        int countLines = selectCountOfLinesInTableCustomer();
+        validateTableIsEmpty(countLines);
     }
 
     static Stream<Arguments> argsProviderFactoryEmptyValue() {
@@ -223,6 +232,9 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         Response responseBody = createCustomerResponse(requestBody, phoneNumber);
 
         ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
+
+        int countLines = selectCountOfLinesInTableCustomer();
+        validateTableIsEmpty(countLines);
     }
 
     static Stream<Arguments> argsProviderFactoryEmptyField() {
@@ -248,6 +260,9 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
         ResponseValidationNegativeSeveralLines.validateFields(responseBody, expectedStatusCode, responseTime, path);
+
+        int countLines = selectCountOfLinesInTableCustomer();
+        validateTableIsEmpty(countLines);
     }
 
     @Test
@@ -264,6 +279,9 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
         ResponseValidationNegativeSeveralLines.validateFields(responseBody, expectedStatusCode, responseTime, path);
+
+        int countLines = selectCountOfLinesInTableCustomer();
+        validateTableIsEmpty(countLines);
     }
 
     @ParameterizedTest(name = "Создание клиента с номером телефона {0}")
@@ -278,6 +296,9 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         Response responseBody = createCustomerResponse(requestBody, argument);
 
         ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
+
+        int countLines = selectCountOfLinesInTableCustomer();
+        validateTableIsEmpty(countLines);
     }
 
     static Stream<String> argsProviderFactoryPhoneNumber() {
@@ -304,6 +325,9 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
         ResponseValidationNegativeSeveralLines.validateFields(responseBody, expectedStatusCode, responseTime, path);
+
+        int countLines = selectCountOfLinesInTableCustomer();
+        validateTableIsEmpty(countLines);
     }
 
     @Test
@@ -320,6 +344,9 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
         ResponseValidationNegativeSeveralLines.validateFields(responseBody, statusCode, responseTime, path);
+
+        int countLines = selectCountOfLinesInTableCustomer();
+        validateTableIsEmpty(countLines);
     }
 
     @Test
@@ -336,6 +363,9 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
         ResponseValidationNegativeSeveralLines.validateFields(responseBody, statusCode, responseTime, path);
+
+        int countLines = selectCountOfLinesInTableCustomer();
+        validateTableIsEmpty(countLines);
     }
 
     @Test
@@ -376,6 +406,9 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         Response responseBody = createCustomerResponse(requestBody.replace("ivanpetr@mail.ru", argument), phoneNumber);
 
         ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
+
+        int countLines = selectCountOfLinesInTableCustomer();
+        validateTableIsEmpty(countLines);
     }
 
     static Stream<String> argsProviderFactoryEmailNegative() {
@@ -397,6 +430,9 @@ public class CreatingCustomerTest implements ApiConfigSetup {
         String responseTime = responseBody.then().extract().path("timestamp").toString();
 
         ResponseValidationNegativeSeveralLines.validateFields(responseBody, statusCode, responseTime, path);
+
+        int countLines = selectCountOfLinesInTableCustomer();
+        validateTableIsEmpty(countLines);
     }
 
     static Stream<String> argsProviderFactoryDateOfBirthNegative() {

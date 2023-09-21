@@ -46,7 +46,7 @@ public class GettingCustomerByPhoneNumberTest implements ApiConfigSetup {
 
         Response responseBody = getCustomerByPhoneNumber(phoneNumber);
 
-        ResponseValidationPositive.validateFields(requestBody, responseBody, statusCode, nowTime, phoneNumber);
+        ResponseValidationPositive.validateFieldsFromResponse(requestBody, responseBody, statusCode, nowTime, phoneNumber);
     }
 
     @Test

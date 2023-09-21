@@ -46,7 +46,7 @@ public class GettingCustomerByIdTest implements ApiConfigSetup {
 
         Response responseBody = getCustomerById(id);
 
-        ResponseValidationPositive.validateFields(requestBody, responseBody, statusCode, nowTime, phoneNumber);
+        ResponseValidationPositive.validateFieldsFromResponse(requestBody, responseBody, statusCode, nowTime, phoneNumber);
     }
 
     @Test
