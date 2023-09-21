@@ -1,31 +1,16 @@
 package test;
 
 import config.ApiConfigSetup;
-import config.DataProvider;
+import config.BaseTest;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import jdk.jfr.Description;
 import org.junit.jupiter.api.*;
-import validator.response_validator.ResponseValidationNegativeOneLine;
-import validator.response_validator.ResponseValidationNegativeSeveralLines;
+import validator.response_validator.ResponseValidationNegative;
 
-import static method_call.call_create_customer.CreateCustomer.createCustomerResponse;
-import static method_call.call_delete_customer.DeleteCustomerById.deleteCustomer;
-import static utils.GeneratorPhoneNumber.getPhoneNumber;
+import static method_call.CustomersRequestHandler.deleteCustomer;
 
-public class DeletingCustomerByIDTest implements ApiConfigSetup {
-
-    private static int id;
-
-    @BeforeEach
-    void creatingCustomer() {
-        String requestBody = DataProvider.getTestData("src/main/resources/request/post_request/create-customer-required-fields.json");
-        String phoneNumber = getPhoneNumber();
-
-        Response responseBody = createCustomerResponse(requestBody, phoneNumber);
-
-        id = responseBody.then().extract().path("id");
-    }
+public class DeletingCustomerByIDTest extends BaseTest implements ApiConfigSetup {
 
     @Test
     @DisplayName("Удаление клиента по существующему id")
@@ -49,7 +34,7 @@ public class DeletingCustomerByIDTest implements ApiConfigSetup {
 
         Response responseBody = deleteCustomer(id);
 
-        ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, expectedStatusCode);
+        ResponseValidationNegative.validateOneField(responseBody, errorMessage, expectedStatusCode);
     }
 
     @Test
@@ -62,7 +47,7 @@ public class DeletingCustomerByIDTest implements ApiConfigSetup {
         Response response = RestAssured.delete("/customers/" + null);
         String responseTime = response.then().extract().path("timestamp").toString();
 
-        ResponseValidationNegativeSeveralLines.validateFields(response, statusCode, responseTime, path);
+        ResponseValidationNegative.validateSeveralFields(response, statusCode, responseTime, path);
     }
 
     @Test
@@ -75,6 +60,6 @@ public class DeletingCustomerByIDTest implements ApiConfigSetup {
 
         Response response = RestAssured.delete("/customers/{id}", negativeId);
 
-        ResponseValidationNegativeOneLine.validateFields(response, errorMessage, statusCode);
+        ResponseValidationNegative.validateOneField(response, errorMessage, statusCode);
     }
 }

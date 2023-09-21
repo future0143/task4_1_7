@@ -17,6 +17,7 @@ public class IsAfter<T> extends BaseMatcher<T> {
     public boolean matches(Object requestTime) {
         DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
         LocalDateTime updatedAt = LocalDateTime.parse((CharSequence) requestTime, formatter);
+
         return updatedAt.isAfter(nowTime);
     }
 

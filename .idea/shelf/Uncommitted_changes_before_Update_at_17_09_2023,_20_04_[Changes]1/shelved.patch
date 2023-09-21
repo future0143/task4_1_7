@@ -1,0 +1,19 @@
+Index: src/main/java/model/Customer.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package model;\n\npublic class Customer {\n\n    private int id;\n    private String firstName;\n    private String lastName;\n    private String phoneNumber;\n    private String email;\n    private String dateOfBirth;\n    private Loyalty loyalty;\n    private String shopCode;\nprivate String updatedAt;\nprivate String createdAt;\n\n    public Customer(int id, String firstName, String lastName, String phoneNumber, String email, String dateOfBirth, Loyalty loyalty, String shopCode) {\n        this.id = id;\n        this.firstName = firstName;\n        this.lastName = lastName;\n        this.phoneNumber = phoneNumber;\n        this.email = email;\n        this.dateOfBirth = dateOfBirth;\n        this.loyalty = loyalty;\n        this.shopCode = shopCode;\n    }\n\n    public Customer() {\n    }\n\n    public String getUpdatedAt() {\n        return updatedAt;\n    }\n\n    public String getCreatedAt() {\n        return createdAt;\n    }\n\n    public int getId() {\n        return id;\n    }\n\n    public String getFirstName() {\n        return firstName;\n    }\n\n    public String getLastName() {\n        return lastName;\n    }\n\n    public String getPhoneNumber() {\n        return phoneNumber;\n    }\n\n    public String getEmail() {\n        return email;\n    }\n\n    public String getDateOfBirth() {\n        return dateOfBirth;\n    }\n\n    public Loyalty getLoyalty() {\n        return loyalty;\n    }\n\n    public String getShopCode() {\n        return shopCode;\n    }\n\n    public String get(String argument) {\n        return switch (argument) {\n            case \"firstName\" -> getFirstName();\n            case \"lastName\" -> getLastName();\n            case \"phoneNumber\" -> getPhoneNumber();\n            default -> \"\";\n        };\n    }\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/java/model/Customer.java b/src/main/java/model/Customer.java
+--- a/src/main/java/model/Customer.java	
++++ b/src/main/java/model/Customer.java	
+@@ -10,8 +10,6 @@
+     private String dateOfBirth;
+     private Loyalty loyalty;
+     private String shopCode;
+-private String updatedAt;
+-private String createdAt;
+ 
+     public Customer(int id, String firstName, String lastName, String phoneNumber, String email, String dateOfBirth, Loyalty loyalty, String shopCode) {
+         this.id = id;

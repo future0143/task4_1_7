@@ -12,6 +12,7 @@ public class TestProperties {
         } catch (IOException e) {
             throw new RuntimeException("Failed to load test properties");
         }
+
         return properties.getProperty(propertyName);
     }
 }

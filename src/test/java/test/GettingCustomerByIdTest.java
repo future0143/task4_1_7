@@ -1,40 +1,22 @@
 package test;
 
 import config.ApiConfigSetup;
-import config.DataProvider;
+import config.BaseTest;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import jdk.jfr.Description;
 import org.junit.jupiter.api.*;
-import validator.response_validator.ResponseValidationNegativeOneLine;
-import validator.response_validator.ResponseValidationNegativeSeveralLines;
+import validator.response_validator.ResponseValidationNegative;
 import validator.response_validator.ResponseValidationPositive;
 
-import java.time.LocalDateTime;
+import static method_call.CustomersRequestHandler.*;
 
-import static method_call.call_create_customer.CreateCustomer.createCustomerResponse;
-import static method_call.call_delete_customer.DeleteCustomerById.deleteCustomer;
-import static method_call.call_get_byId_customer.GetCustomerById.getCustomerById;
-import static utils.GeneratorPhoneNumber.getPhoneNumber;
-
-public class GettingCustomerByIdTest implements ApiConfigSetup {
-
-    private static int id;
-    private static String requestBody;
-    private static String phoneNumber;
-    private static LocalDateTime nowTime;
+public class GettingCustomerByIdTest extends BaseTest implements ApiConfigSetup {
 
     @BeforeEach
     void creatingCustomer(TestInfo info) {
         if (!info.getDisplayName().equals("Получение клиента по одному из обязательных полей")) {
-            requestBody = DataProvider.getTestData("src/main/resources/request/post_request/create-customer-required-fields.json");
-            phoneNumber = getPhoneNumber();
-
-            nowTime = LocalDateTime.now();
-
-            Response responseBody = createCustomerResponse(requestBody, phoneNumber);
-
-            id = responseBody.then().extract().path("id");
+            super.creatingCustomer();
         }
     }
 
@@ -59,7 +41,7 @@ public class GettingCustomerByIdTest implements ApiConfigSetup {
         deleteCustomer(id);
 
         Response response = getCustomerById(id);
-        ResponseValidationNegativeOneLine.validateFields(response, errorMessage, statusCode);
+        ResponseValidationNegative.validateOneField(response, errorMessage, statusCode);
     }
 
     @Test
@@ -74,7 +56,7 @@ public class GettingCustomerByIdTest implements ApiConfigSetup {
         Response response = RestAssured.get("/customers/" + strId);
         String responseTime = response.then().extract().path("timestamp").toString();
 
-        ResponseValidationNegativeSeveralLines.validateFields(response, statusCode, responseTime, path);
+        ResponseValidationNegative.validateSeveralFields(response, statusCode, responseTime, path);
     }
 
     @Test
@@ -87,7 +69,7 @@ public class GettingCustomerByIdTest implements ApiConfigSetup {
         Response response = RestAssured.get("/customers/" + null);
         String responseTime = response.then().extract().path("timestamp").toString();
 
-        ResponseValidationNegativeSeveralLines.validateFields(response, statusCode, responseTime, path);
+        ResponseValidationNegative.validateSeveralFields(response, statusCode, responseTime, path);
     }
 
     @Test
@@ -100,6 +82,6 @@ public class GettingCustomerByIdTest implements ApiConfigSetup {
 
         Response response = RestAssured.get("/customers/" + requestId);
 
-        ResponseValidationNegativeOneLine.validateFields(response, errorMessage, statusCode);
+        ResponseValidationNegative.validateOneField(response, errorMessage, statusCode);
     }
 }

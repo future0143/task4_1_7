@@ -1,42 +1,22 @@
 package test;
 
 import config.ApiConfigSetup;
-import config.DataProvider;
+import config.BaseTest;
 import io.restassured.response.Response;
 import jdk.jfr.Description;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import utils.GeneratorPhoneNumber;
-import validator.response_validator.ResponseValidationNegativeOneLine;
+import validator.response_validator.ResponseValidationNegative;
 import validator.response_validator.ResponseValidationPositive;
 
-import java.time.LocalDateTime;
 import java.util.stream.Stream;
 
-import static method_call.call_create_customer.CreateCustomer.createCustomerResponse;
-import static method_call.call_delete_customer.DeleteCustomerById.deleteCustomer;
-import static method_call.call_get_byPhoneNumber.GetCustomerByPhoneNumber.getCustomerByPhoneNumber;
-import static utils.GeneratorPhoneNumber.getPhoneNumber;
+import static method_call.CustomersRequestHandler.*;
+import static utils.FormattingPhoneNumber.formatPhoneNumber;
 
-public class GettingCustomerByPhoneNumberTest implements ApiConfigSetup {
-
-    private static int id;
-    private static String requestBody;
-    private static String phoneNumber;
-    private static LocalDateTime nowTime;
-
-    @BeforeEach
-    void creatingCustomer() {
-        requestBody = DataProvider.getTestData("src/main/resources/request/post_request/create-customer-required-fields.json");
-        phoneNumber = getPhoneNumber();
-
-        nowTime = LocalDateTime.now();
-
-        Response responseBody = createCustomerResponse(requestBody, phoneNumber);
-
-        id = responseBody.then().extract().path("id");
-    }
+public class GettingCustomerByPhoneNumberTest extends BaseTest implements ApiConfigSetup {
 
     @Test
     @DisplayName("Получение клиента по существующему номеру телефона")
@@ -59,7 +39,7 @@ public class GettingCustomerByPhoneNumberTest implements ApiConfigSetup {
 
         Response responseBody = getCustomerByPhoneNumber(phoneNumber);
 
-        ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
+        ResponseValidationNegative.validateOneField(responseBody, errorMessage, statusCode);
     }
 
     @ParameterizedTest(name = "Получение клиента с номером телефона {0}")
@@ -72,7 +52,7 @@ public class GettingCustomerByPhoneNumberTest implements ApiConfigSetup {
 
         Response responseBody = getCustomerByPhoneNumber(argument);
 
-        ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
+        ResponseValidationNegative.validateOneField(responseBody, errorMessage, statusCode);
     }
 
     static Stream<String> argsProviderFactoryPhoneNumber() {
@@ -87,20 +67,11 @@ public class GettingCustomerByPhoneNumberTest implements ApiConfigSetup {
     public void getCustomerByPhoneNumberAnotherFormat() {
         int statusCode = 404;
         String errorMessage = "Customer not found";
-        String digitsOnly = phoneNumber.replaceAll("[^0-9]", "");
 
-        String formattedNumber = "+" + digitsOnly.charAt(0) + // Добавляем +7
-                "(" +
-                digitsOnly.substring(1, 4) + // Добавляем код региона
-                ")" +
-                digitsOnly.substring(4, 7) + // Добавляем первую группу цифр
-                "-" +
-                digitsOnly.substring(7, 9) + // Добавляем вторую группу цифр
-                "-" +
-                digitsOnly.substring(9); // Добавляем оставшиеся цифры
+        String formattedNumber = formatPhoneNumber(phoneNumber);
 
         Response responseBody = getCustomerByPhoneNumber(formattedNumber);
 
-        ResponseValidationNegativeOneLine.validateFields(responseBody, errorMessage, statusCode);
+        ResponseValidationNegative.validateOneField(responseBody, errorMessage, statusCode);
     }
 }

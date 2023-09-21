@@ -11,6 +11,7 @@ public class CreateCustomerRequestSpecification {
                 .contentType(ContentType.JSON);
 
         requestSpecification.body(requestBody.replace("+78905927238", phoneNumber));
+
         return requestSpecification;
     }
 }
