@@ -1,17 +1,17 @@
 package test;
 
 import config.ApiConfigSetup;
-import config.BaseTest;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import jdk.jfr.Description;
 import org.junit.jupiter.api.*;
+import test.base_tests.BaseTestCreatingCustomer;
 import validator.response_validator.ResponseValidationNegative;
 import validator.response_validator.ResponseValidationPositive;
 
 import static method_call.CustomersRequestHandler.*;
 
-public class GettingCustomerByIdTest extends BaseTest implements ApiConfigSetup {
+public class GettingCustomerByIdTestCreatingCustomer extends BaseTestCreatingCustomer implements ApiConfigSetup {
 
     @BeforeEach
     void creatingCustomer(TestInfo info) {

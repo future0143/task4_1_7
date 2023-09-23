@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.response.Response;
 import model.Customer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 //достает данные из json как объект
 public class SerializingCustomer {
 
@@ -23,6 +26,12 @@ public class SerializingCustomer {
     public static Customer getCustomer(Response responseBody) {
 
         return responseBody.then().extract().as(Customer.class);
+    }
+
+    public static List<Customer> getAllCustomersAsList(Response responseBody) {
+        List<Customer> customerList = responseBody.then().extract().body().jsonPath().getList("", Customer.class);
+
+        return customerList;
     }
 
     public static Customer getCustomerFromRequestBody(String requestBody) {

@@ -13,7 +13,7 @@
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
     <connection id="60e63fcd-28a0-46db-bf64-48cbcfd54b4a">
-      <console name="Connection" type="STANDARD" schema="" session="Main">select * from customer</console>
+      <console name="Connection" type="STANDARD" schema="PUBLIC" session="Main"><![CDATA[select * from CUSTOMER]]></console>
     </connection>
   </component>
   <component name="DBNavigator.Project.DatabaseEditorStateManager">
@@ -251,7 +251,6 @@
           <content-type name="Groovy" enabled="true" />
           <content-type name="FTL" enabled="true" />
           <content-type name="VTL" enabled="true" />
-          <content-type name="AIDL" enabled="true" />
           <content-type name="YAML" enabled="true" />
           <content-type name="Manifest" enabled="true" />
         </content-types>
@@ -519,6 +518,10 @@
     </general-settings>
   </component>
   <component name="DBNavigator.Project.StatementExecutionManager">
-    <execution-variables />
+    <execution-variables>
+      <file file-url="db://60e63fcd-28a0-46db-bf64-48cbcfd54b4a/consoles/Connection">
+        <variable name=":phone_number" dataType="LITERAL" values="+79521166301, " />
+      </file>
+    </execution-variables>
   </component>
 </project>

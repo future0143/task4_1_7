@@ -6,9 +6,12 @@ import org.sql2o.Connection;
 import org.sql2o.Query;
 import org.sql2o.Sql2o;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static validator.database_validator.DatabaseValidation.validateTableIsEmpty;
 
 public class DatabaseManager {
     private static final Sql2o sql2o = new Sql2o(TestProperties.getValue("db.url"),
@@ -48,13 +51,37 @@ public class DatabaseManager {
 
     public static Customer selectCustomer (String phoneNumber) {
         try (Connection connection = sql2o.open();
-             Query query = connection.createQuery("SELECT first_name, last_name,phone_number,email,date_of_birth," +
-                             "shop_code,l.bonus_card_number AS loyalty.bonus_card_number, l.status " +
-                             "AS loyalty.status, l.discount_rate AS loyalty.discount_rate FROM customer " +
-                             "JOIN loyalty l ON c.loyalty_bonus_card_number = l.bonus_card_number " +
-                             "WHERE phone_number = :phone_number")
-                     .addParameter("phone_number", phoneNumber)) {
-            return query.executeScalar(Customer.class);
+             Query query = connection.createQuery("SELECT c.id, c.first_name, c.last_name, c.phone_number, c.email, " +
+                             "c.date_of_birth, c.shop_code, l.bonus_card_number, l.status, l.discount_rate FROM Customer c " +
+                             "JOIN Loyalty l ON c.loyalty_bonus_card_number = l.bonus_card_number WHERE c.phone_number = :phone_number")
+                     .addParameter("phone_number", phoneNumber)
+                     .setAutoDeriveColumnNames(true))
+        {
+            return query.executeAndFetchFirst(Customer.class);
         }
+    }
+
+    public static List<Map<String, Object>> selectAllCustomerAsList() {
+        try (Connection connection = sql2o.open();
+             Query query = connection.createQuery("SELECT * FROM Customer")) {
+            List<Map<String, Object>> result = query.executeAndFetchTable().asList();
+            if (result.isEmpty()) {
+                return new ArrayList<>();
+            } else {
+                return result;
+            }
+        }
+    }
+
+    public static void truncateTable(String nameTable) {
+        try (Connection connection = sql2o.open()) {
+            String sql = "DELETE FROM " + nameTable;
+            Query query = connection.createQuery(sql);
+            query.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        int count = selectCountOfLinesInTableCustomer();
+        validateTableIsEmpty(count);
     }
 }

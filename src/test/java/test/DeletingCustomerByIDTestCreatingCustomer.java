@@ -1,16 +1,16 @@
 package test;
 
 import config.ApiConfigSetup;
-import config.BaseTest;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import jdk.jfr.Description;
 import org.junit.jupiter.api.*;
+import test.base_tests.BaseTestCreatingCustomer;
 import validator.response_validator.ResponseValidationNegative;
 
 import static method_call.CustomersRequestHandler.deleteCustomer;
 
-public class DeletingCustomerByIDTest extends BaseTest implements ApiConfigSetup {
+public class DeletingCustomerByIDTestCreatingCustomer extends BaseTestCreatingCustomer implements ApiConfigSetup {
 
     @Test
     @DisplayName("Удаление клиента по существующему id")

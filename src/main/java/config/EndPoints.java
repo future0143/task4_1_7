@@ -6,6 +6,7 @@ public enum EndPoints {
     GET_CUSTOMERS_BY_ID("/customers/{id}"),
     GET_CUSTOMERS_BY_PHONE_NUMBER("/customers/filter"),
 
+    GET_ALL_CUSTOMERS("/customers"),
     DELETE_CUSTOMERS("/customers/{id}");
     private final String path;
 

@@ -4,6 +4,8 @@ import config.SerializingCustomer;
 import model.Customer;
 import model.Loyalty;
 
+import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,4 +41,17 @@ public class DatabaseValidation {
     public static void validateTableIsEmpty(int countLines) {
         assertTrue(countLines == 0);
     }
+
+    public static void checkThatTableNotHaveExtraColumn(String nameAddingColumn) {
+        try {
+            Customer.class.getDeclaredField("nameAddingColumn");
+            fail("Поле " + nameAddingColumn + "найдено, хотя не должно было.");
+        } catch (NoSuchFieldException e) {
+            e.getStackTrace();
+        }
+    }
+
+//    public static void checkCustomersFromTableEqualsCreatedCustomers(List<Customer> allCreatedCustomers, List<Map<String, Object>> listFromDb) {
+//
+//    }
 }

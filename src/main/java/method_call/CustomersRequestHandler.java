@@ -24,4 +24,8 @@ public class CustomersRequestHandler {
         return RestAssured.given().queryParam("phoneNumber", phoneNumber)
                 .when().get(EndPoints.GET_CUSTOMERS_BY_PHONE_NUMBER.getPath());
     }
+
+    public static Response getAllCustomers() {
+        return RestAssured.get(EndPoints.GET_ALL_CUSTOMERS.getPath());
+    }
 }
