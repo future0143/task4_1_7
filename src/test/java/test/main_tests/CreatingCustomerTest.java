@@ -1,10 +1,10 @@
-package test;
+package test.main_tests;
 
 import static db.DatabaseManager.selectCountOfLinesInTableCustomer;
 import static method_call.CustomersRequestHandler.createCustomerResponse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static utils.GeneratorPhoneNumber.getPhoneNumber;
+import static utils.PhoneUtils.getPhoneNumber;
 import static validator.database_validator.DatabaseValidation.validateTableIsEmpty;
 
 import config.ApiConfigSetup;
@@ -20,9 +20,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import test.base_tests.BaseTestCleanTable;
-import utils.GeneratorPhoneNumber;
+import test.base_tests.BaseTestSetupAndCleanup;
 import config.EndPoints;
+import utils.PhoneUtils;
 import validator.database_validator.DatabaseValidation;
 import validator.response_validator.ResponseValidationNegative;
 import validator.response_validator.ResponseValidationPositive;
@@ -31,7 +31,7 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class CreatingCustomerTest extends BaseTestCleanTable implements ApiConfigSetup {
+public class CreatingCustomerTest extends BaseTestSetupAndCleanup implements ApiConfigSetup {
 
     @ParameterizedTest(name = "Заполнение полей из файла: {0}")
     @DisplayName("Создание клиента с заполнением различных наборов полей")
@@ -166,10 +166,10 @@ public class CreatingCustomerTest extends BaseTestCleanTable implements ApiConfi
         Response responseBody = createCustomerResponse(requestBody, phoneNumber);
         Customer customer = SerializingCustomer.getCustomer(responseBody);
 
-        ResponseValidationPositive.validateFieldsFromCustomer(requestBody, responseBody,customer, expectedStatusCode, nowTime, phoneNumber);
+        ResponseValidationPositive.validateFieldsFromCustomer(requestBody, responseBody, customer, expectedStatusCode, nowTime, phoneNumber);
 
         Customer customerData = DatabaseManager.selectCustomer(phoneNumber);
-        ResponseValidationPositive.validateFieldsFromCustomer(requestBody, responseBody,customerData, expectedStatusCode, nowTime, phoneNumber);
+        ResponseValidationPositive.validateFieldsFromCustomer(requestBody, responseBody, customerData, expectedStatusCode, nowTime, phoneNumber);
 
         Loyalty loyaltyData = customerData.getLoyalty();
         ResponseValidationPositive.validateLoyalty(loyaltyData);
@@ -302,8 +302,8 @@ public class CreatingCustomerTest extends BaseTestCleanTable implements ApiConfi
 
     static Stream<String> argsProviderFactoryPhoneNumber() {
         return Stream.of("",
-                GeneratorPhoneNumber.getPhoneNumber().replace("+7", "8"),
-                GeneratorPhoneNumber.getPhoneNumber().substring(2));
+                PhoneUtils.getPhoneNumber().replace("+7", "8"),
+                PhoneUtils.getPhoneNumber().substring(2));
     }
 
     @Test
@@ -375,18 +375,14 @@ public class CreatingCustomerTest extends BaseTestCleanTable implements ApiConfi
         String phoneNumber = getPhoneNumber();
         int statusCode = 201;
 
-        LocalDateTime nowTime = LocalDateTime.now();
-
         Response responseBody = createCustomerResponse(requestBody, phoneNumber);
         String responseBodyAsString = responseBody.getBody().asString();
 
         responseBody.then().statusCode(statusCode);
         assertFalse(responseBodyAsString.contains("eyeColor"));
 
-        Customer customer = DatabaseManager.selectCustomer(phoneNumber);
-        DatabaseValidation.checkThatTableNotHaveExtraColumn("eyeColor");
-
-        ResponseValidationPositive.validateFieldsFromCustomer(requestBody,responseBody,customer,statusCode,nowTime,phoneNumber);
+        DatabaseManager.selectCustomer(phoneNumber);
+        DatabaseValidation.checkThatTableHaveNotExtraColumn("eyeColor");
     }
 
     @ParameterizedTest(name = "Создание клиента с email {0}")

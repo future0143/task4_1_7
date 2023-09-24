@@ -1,4 +1,4 @@
-package test;
+package test.main_tests;
 
 import config.ApiConfigSetup;
 import io.restassured.response.Response;
@@ -7,16 +7,16 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import test.base_tests.BaseTestCreatingCustomer;
-import utils.GeneratorPhoneNumber;
+import utils.PhoneUtils;
 import validator.response_validator.ResponseValidationNegative;
 import validator.response_validator.ResponseValidationPositive;
 
 import java.util.stream.Stream;
 
 import static method_call.CustomersRequestHandler.*;
-import static utils.FormattingPhoneNumber.formatPhoneNumber;
+import static utils.PhoneUtils.formatPhoneNumber;
 
-public class GettingCustomerByPhoneNumberTestCreatingCustomer extends BaseTestCreatingCustomer implements ApiConfigSetup {
+public class GettingCustomerByPhoneNumber extends BaseTestCreatingCustomer implements ApiConfigSetup {
 
     @Test
     @DisplayName("Получение клиента по существующему номеру телефона")
@@ -57,8 +57,8 @@ public class GettingCustomerByPhoneNumberTestCreatingCustomer extends BaseTestCr
 
     static Stream<String> argsProviderFactoryPhoneNumber() {
         return Stream.of("",
-                GeneratorPhoneNumber.getPhoneNumber().replace("+7", "8"),
-                GeneratorPhoneNumber.getPhoneNumber().substring(2));
+                PhoneUtils.getPhoneNumber().replace("+7", "8"),
+                PhoneUtils.getPhoneNumber().substring(2));
     }
 
     @Test

@@ -1,7 +1,10 @@
 package model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+import java.util.Date;
 import java.util.Objects;
 
 @Getter
@@ -17,8 +20,8 @@ public class Customer {
     private String dateOfBirth;
     private Loyalty loyalty;
     private String shopCode;
-    private String updatedAt;
-    private String createdAt;
+    private Date updatedAt;
+    private Date createdAt;
 
     public Customer(int id, String firstName, String lastName, String phoneNumber, String email, String dateOfBirth, Loyalty loyalty, String shopCode) {
         this.id = id;

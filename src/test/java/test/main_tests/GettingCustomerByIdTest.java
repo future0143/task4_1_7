@@ -1,4 +1,4 @@
-package test;
+package test.main_tests;
 
 import config.ApiConfigSetup;
 import io.restassured.RestAssured;
@@ -11,7 +11,7 @@ import validator.response_validator.ResponseValidationPositive;
 
 import static method_call.CustomersRequestHandler.*;
 
-public class GettingCustomerByIdTestCreatingCustomer extends BaseTestCreatingCustomer implements ApiConfigSetup {
+public class GettingCustomerByIdTest extends BaseTestCreatingCustomer implements ApiConfigSetup {
 
     @BeforeEach
     void creatingCustomer(TestInfo info) {

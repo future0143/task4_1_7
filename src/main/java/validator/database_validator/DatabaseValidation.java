@@ -2,10 +2,7 @@ package validator.database_validator;
 
 import config.SerializingCustomer;
 import model.Customer;
-import model.Loyalty;
 
-import java.lang.reflect.Field;
-import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,6 +17,7 @@ public class DatabaseValidation {
         assertEquals(customerData.get("last_name"), requestCustomer.getLastName());
         assertEquals(customerData.get("phone_number"), phoneNumber);
         assertEquals(customerData.get("email"), requestCustomer.getEmail());
+        assertEquals(customerData.get("shop_code"), requestCustomer.getShopCode());
         Object dateOfBirthObject = customerData.get("date_of_birth");
         if (dateOfBirthObject != null) {
             String dateOfBirthString = dateOfBirthObject.toString();
@@ -27,7 +25,6 @@ public class DatabaseValidation {
         } else {
             assertNull(requestCustomer.getDateOfBirth());
         }
-        assertNull(customerData.get("shop_code"));
         assertNotNull(customerData.get("updated_at"));
         assertNotNull(customerData.get("created_at"));
     }
@@ -39,19 +36,15 @@ public class DatabaseValidation {
     }
 
     public static void validateTableIsEmpty(int countLines) {
-        assertTrue(countLines == 0);
+        assertEquals(0, countLines);
     }
 
-    public static void checkThatTableNotHaveExtraColumn(String nameAddingColumn) {
+    public static void checkThatTableHaveNotExtraColumn(String nameAddingColumn) {
         try {
-            Customer.class.getDeclaredField("nameAddingColumn");
+            Customer.class.getDeclaredField(nameAddingColumn);
             fail("Поле " + nameAddingColumn + "найдено, хотя не должно было.");
         } catch (NoSuchFieldException e) {
             e.getStackTrace();
         }
     }
-
-//    public static void checkCustomersFromTableEqualsCreatedCustomers(List<Customer> allCreatedCustomers, List<Map<String, Object>> listFromDb) {
-//
-//    }
 }

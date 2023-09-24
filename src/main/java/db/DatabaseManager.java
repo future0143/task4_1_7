@@ -1,26 +1,24 @@
 package db;
 
-import config.TestProperties;
 import model.Customer;
 import org.sql2o.Connection;
 import org.sql2o.Query;
-import org.sql2o.Sql2o;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static db.ConnectionDb.getConnection;
 import static validator.database_validator.DatabaseValidation.validateTableIsEmpty;
 
 public class DatabaseManager {
-    private static final Sql2o sql2o = new Sql2o(TestProperties.getValue("db.url"),
-            TestProperties.getValue("db.username"),
-            TestProperties.getValue("db.password"));
 
     public static Map<String, Object> selectCustomerAsMap(String phoneNumber) {
-        try (Connection connection = sql2o.open();
-             Query query = connection.createQuery("SELECT * FROM Customer WHERE Customer.phone_number = :phone_number")
+        String select = "SELECT * FROM Customer WHERE Customer.phone_number = :phone_number";
+
+        try (Connection connection = getConnection();
+             Query query = connection.createQuery(select)
                      .addParameter("phone_number", phoneNumber)) {
             List<Map<String, Object>> result = query.executeAndFetchTable().asList();
             if (result.isEmpty()) {
@@ -30,9 +28,12 @@ public class DatabaseManager {
             }
         }
     }
+
     public static Map<String, Object> selectLoyalty(String bonusCardNumber) {
-        try (Connection connection = sql2o.open();
-             Query query = connection.createQuery("SELECT * FROM Loyalty WHERE Loyalty.bonus_card_number = :bonus_card_number")
+        String select = "SELECT * FROM Loyalty WHERE Loyalty.bonus_card_number = :bonus_card_number";
+
+        try (Connection connection = getConnection();
+             Query query = connection.createQuery(select)
                      .addParameter("bonus_card_number", bonusCardNumber)) {
             List<Map<String, Object>> result = query.executeAndFetchTable().asList();
             if (result.isEmpty()) {
@@ -42,29 +43,40 @@ public class DatabaseManager {
             }
         }
     }
+
     public static int selectCountOfLinesInTableCustomer() {
-        try (Connection connection = sql2o.open()) {
-             String query = "SELECT COUNT(*) FROM Customer";
-             return connection.createQuery(query).executeScalar(Integer.class);
+        String select = "SELECT COUNT(*) FROM Customer";
+
+        try (Connection connection = getConnection()) {
+            String query = select;
+
+            return connection.createQuery(query).executeScalar(Integer.class);
         }
     }
 
-    public static Customer selectCustomer (String phoneNumber) {
-        try (Connection connection = sql2o.open();
-             Query query = connection.createQuery("SELECT c.id, c.first_name, c.last_name, c.phone_number, c.email, " +
-                             "c.date_of_birth, c.shop_code, l.bonus_card_number, l.status, l.discount_rate FROM Customer c " +
-                             "JOIN Loyalty l ON c.loyalty_bonus_card_number = l.bonus_card_number WHERE c.phone_number = :phone_number")
+    public static Customer selectCustomer(String phoneNumber) {
+        String select = "SELECT id, first_name, last_name, phone_number, email, date_of_birth, shop_code, updated_At, created_at," +
+                "l.bonus_card_number AS \"loyalty.bonus_card_number\", l.status AS \"loyalty.status\", " +
+                "l.discount_rate AS \"loyalty.discount_rate\" FROM customer c JOIN loyalty l " +
+                "ON c.loyalty_bonus_card_number = l.bonus_card_number WHERE phone_number = :phone_number";
+
+        try (Connection connection = getConnection();
+             Query query = connection.createQuery(select)
                      .addParameter("phone_number", phoneNumber)
-                     .setAutoDeriveColumnNames(true))
-        {
+                     .setAutoDeriveColumnNames(true)) {
             return query.executeAndFetchFirst(Customer.class);
         }
     }
 
-    public static List<Map<String, Object>> selectAllCustomerAsList() {
-        try (Connection connection = sql2o.open();
-             Query query = connection.createQuery("SELECT * FROM Customer")) {
-            List<Map<String, Object>> result = query.executeAndFetchTable().asList();
+    public static List<Customer> selectAllCustomerAsList() {
+        String select = "SELECT id, first_name, last_name, phone_number, email, date_of_birth, shop_code, updated_At, created_at," +
+                "l.bonus_card_number AS \"loyalty.bonus_card_number\", l.status AS \"loyalty.status\", " +
+                "l.discount_rate AS \"loyalty.discount_rate\" FROM customer c JOIN loyalty l " +
+                "ON c.loyalty_bonus_card_number = l.bonus_card_number";
+
+        try (Connection connection = getConnection();
+             Query query = connection.createQuery(select).setAutoDeriveColumnNames(true)) {
+            List<Customer> result = query.executeAndFetch(Customer.class);
             if (result.isEmpty()) {
                 return new ArrayList<>();
             } else {
@@ -74,14 +86,27 @@ public class DatabaseManager {
     }
 
     public static void truncateTable(String nameTable) {
-        try (Connection connection = sql2o.open()) {
-            String sql = "DELETE FROM " + nameTable;
-            Query query = connection.createQuery(sql);
+        String select = "DELETE FROM ";
+        String sql = select + nameTable;
+
+        try (Connection connection = getConnection();
+             Query query = connection.createQuery(sql)
+        ) {
             query.executeUpdate();
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         int count = selectCountOfLinesInTableCustomer();
         validateTableIsEmpty(count);
+    }
+
+    public static void insertShop(String code, String address) {
+        String sql = "INSERT INTO Shop (code, address) values (:code, :address)";
+
+        try (Connection connection = getConnection();
+             Query query = connection.createQuery(sql)
+                     .addParameter("code", code)
+                     .addParameter("address", address)
+        ) {
+            query.executeUpdate();
+        }
     }
 }

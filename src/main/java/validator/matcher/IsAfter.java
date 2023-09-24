@@ -2,8 +2,10 @@ package validator.matcher;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
+
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.time.ZoneId;
+import java.util.Date;
 
 public class IsAfter<T> extends BaseMatcher<T> {
 
@@ -15,8 +17,9 @@ public class IsAfter<T> extends BaseMatcher<T> {
 
     @Override
     public boolean matches(Object requestTime) {
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
-        LocalDateTime updatedAt = LocalDateTime.parse((CharSequence) requestTime, formatter);
+        Date date = (Date) requestTime;
+
+        LocalDateTime updatedAt = date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 
         return updatedAt.isAfter(nowTime);
     }

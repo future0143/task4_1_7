@@ -1,6 +1,6 @@
 package validator.response_validator;
 
-import io.restassured.RestAssured;
+import config.SerializingCustomer;
 import io.restassured.http.ContentType;
 import io.restassured.module.jsv.JsonSchemaValidator;
 import io.restassured.response.Response;
@@ -8,7 +8,6 @@ import model.Customer;
 import model.Loyalty;
 import org.junit.jupiter.api.Assertions;
 import validator.matcher.DateMatchers;
-import config.SerializingCustomer;
 
 import java.time.LocalDateTime;
 
@@ -44,7 +43,7 @@ public class ResponseValidationPositive {
         Assertions.assertNotNull(responseCustomer.getLoyalty().getBonusCardNumber());
         Assertions.assertNotNull(responseCustomer.getLoyalty().getStatus());
         Assertions.assertNotNull(responseCustomer.getLoyalty().getDiscountRate());
-        Assertions.assertNull(responseCustomer.getShopCode());
+        Assertions.assertEquals(responseCustomer.getShopCode(), requestCustomer.getShopCode());
         assertThat(responseCustomer.getUpdatedAt(), DateMatchers.isAfter(nowTime));
         assertThat(responseCustomer.getCreatedAt(), DateMatchers.isAfter(nowTime));
     }

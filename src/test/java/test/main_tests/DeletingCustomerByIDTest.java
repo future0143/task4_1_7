@@ -1,4 +1,4 @@
-package test;
+package test.main_tests;
 
 import config.ApiConfigSetup;
 import io.restassured.RestAssured;
@@ -10,7 +10,7 @@ import validator.response_validator.ResponseValidationNegative;
 
 import static method_call.CustomersRequestHandler.deleteCustomer;
 
-public class DeletingCustomerByIDTestCreatingCustomer extends BaseTestCreatingCustomer implements ApiConfigSetup {
+public class DeletingCustomerByIDTest extends BaseTestCreatingCustomer implements ApiConfigSetup {
 
     @Test
     @DisplayName("Удаление клиента по существующему id")

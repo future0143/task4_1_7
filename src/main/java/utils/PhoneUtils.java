@@ -1,6 +1,9 @@
 package utils;
 
-public class FormattingPhoneNumber {
+import org.apache.commons.lang3.RandomStringUtils;
+
+public class PhoneUtils {
+
     public static String formatPhoneNumber(String phoneNumber) {
         String digitsOnly = phoneNumber.replaceAll("[^0-9]", "");
 
@@ -13,5 +16,9 @@ public class FormattingPhoneNumber {
                 digitsOnly.substring(7, 9) + // Добавляем вторую группу цифр
                 "-" +
                 digitsOnly.substring(9);
+    }
+
+    public static String getPhoneNumber() {
+        return "+7" + RandomStringUtils.randomNumeric(10);
     }
 }
